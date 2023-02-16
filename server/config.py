@@ -1,2 +1,3 @@
 class Config(object):
-    pass
+    DEBUG = True
+    SECRET_KEY = 'shaurma'

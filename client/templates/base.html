@@ -26,16 +26,16 @@
 		</div>
 		<div class="user">
 			{% if current_user.is_anonymous %}
-				<a class="user__log-btn" href="{{ url_for('login') }}">Login</a>
+				<a class="user__log-btn" href="{{ url_for('login_route') }}">Login</a>
 			{% else %}
 				<div class="user__info">
 					<span class="user__FIO">{{current_user.FIO}}</span>
 				</div>
-				<a class="user__log-btn" href="{{ url_for('logout') }}">Logout</a>
+				<a class="user__log-btn" href="{{ url_for('logout_route') }}">Logout</a>
 			{% endif %}
 		</div>
 	</div>
 	{% block react %} {% endblock %}
-	<script type="text/javascript" src="bundle.js"></script>
+	<script type="text/javascript" src="/client/dist/bundle.js"></script>
 </body>
 </html>

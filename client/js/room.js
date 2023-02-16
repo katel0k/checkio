@@ -1,15 +1,17 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 const { io } = require("socket.io-client");
 
 
 class App extends React.Component {
     constructor (props) {
+        super(props);
         this.state = {
             state: props.state
         }
     }
     render () {
-        return (this.state.render());
+        return (this.state.state.render());
     }
 }
 
@@ -89,3 +91,4 @@ class AcceptanceWaitingState extends State {
 
 }
 
+ReactDOM.render(<App state={new PlayingState()}/>, document.querySelector('.__react-root'));
