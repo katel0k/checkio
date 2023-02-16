@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 const { io } = require("socket.io-client");
-
+const socket = io();
 
 class App extends React.Component {
     constructor (props) {
