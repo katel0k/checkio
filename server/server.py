@@ -1,6 +1,7 @@
 from flask import Flask
 from config import Config
 from random import randrange
+from flask_socketio import SocketIO
 
 # obviously bad code
 ids_set = set()
@@ -25,6 +26,8 @@ class Room:
 
 server = Flask(__name__, static_folder="../client")
 server.config.from_object(Config)
+
+socketio = SocketIO(server, ping_timeout=10000)
 
 class Application(object):
     room_list = {}

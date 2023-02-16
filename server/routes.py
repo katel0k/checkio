@@ -5,15 +5,15 @@ import json
 
 @server.route('/')
 @server.route('/index')
-def index():
+def index_route():
     return '<h1>Hello world</h1>'
 
 @server.route('/login')
-def login():
+def login_route():
     return '<h1>Login</h1>'
 
 @server.route('/register')
-def register():
+def register_route():
     return '<h1>Register</h1>'
 
 
@@ -21,7 +21,7 @@ def register():
 
 
 @server.route('/room', methods=['GET', 'POST'])
-def room():
+def room_route():
     if request.method == 'GET':
         return json.dumps(app.get_room_list())
         # pass
@@ -35,7 +35,7 @@ def room():
     return '<h1>Room</h1>'
 
 @server.route('/room/<int:room_id>')
-def room(room_id):
+def room_id_route(room_id):
     if room_id not in app.room_list:
         return redirect('/')
     
@@ -51,9 +51,9 @@ def room(room_id):
         pass # TODO
 
 @server.route('/user')
-def user():
+def user_route():
     return current_user.id # TODO
 
 @server.route('/user/<int:user_id>')
-def user(user_id):
+def user_by_id_route(user_id):
     return current_user.id # TODO

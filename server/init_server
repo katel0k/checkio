@@ -1,0 +1,3 @@
+source virt/bin/activate
+pip install flask flask_login flask_socketio
+export FLASK_APP=server.py
