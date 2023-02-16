@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>{{title}}</title>
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+	<style type="text/css">
+		/* @font-face {
+			font-family: Montserrat;
+			src: url({{ url_for('static', filename='Montserrat-regular.ttf') }});
+		}
+		@font-face {
+			font-family: Open-Sans;
+			src: url({{ url_for('static', filename='OpenSans-regular.ttf') }});
+		}
+		@font-face {
+			font-family: Roboto;
+			src: url({{ url_for('static', filename='Roboto-regular.ttf') }});
+		} */
+	</style>
+</head>
+<body>
+	<div class="nav">
+		<div class="logo">
+			<img src="favicon.ico" class="logo-img">
+		</div>
+		<div class="user">
+			{% if current_user.is_anonymous %}
+				<a class="user__log-btn" href="{{ url_for('login') }}">Login</a>
+			{% else %}
+				<div class="user__info">
+					<span class="user__FIO">{{current_user.FIO}}</span>
+				</div>
+				<a class="user__log-btn" href="{{ url_for('logout') }}">Logout</a>
+			{% endif %}
+		</div>
+	</div>
+	{% block react %} {% endblock %}
+	<script type="text/javascript" src="bundle.js"></script>
+</body>
+</html>
