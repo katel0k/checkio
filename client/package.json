@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server",
     "start": "webpack",
-    "watch": "webpack --watch"
+    "watch": "export NODE_OPTIONS=--openssl-legacy-provider && webpack --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.10.3",
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "socket.io-client": "^4.6.0"
   }
 }

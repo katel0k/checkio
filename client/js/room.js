@@ -1,5 +1,5 @@
 import React from 'react';
-
+const { io } = require("socket.io-client");
 
 
 class App extends React.Component {
