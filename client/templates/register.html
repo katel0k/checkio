@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block react %}
+	<div id="register" class="__react-root">
+		<form method="POST" class="register-form">
+			{{ form.hidden_tag() }}
+			<label class="register-form__label form__label">
+				{{ form.nickname(placeholder="Nickname") }}
+			</label>
+			<label class="register-form__label form__label">
+				{{ form.email(placeholder="Email") }}
+			</label>
+			<label class="register-form__label form__label">
+				{{ form.password(placeholder="Password") }}
+			</label>
+			<label class="register-form__label form__label">
+				{{ form.password2(placeholder="Password repeat") }}
+			</label>
+			<label class="register-form__label form__label">
+				{{ form.submit() }}
+			</label>
+		</form>
+		<p>
+			<span>You have profile?</span> <a href="/login">Sign In!</a>
+		</p>
+	</div>
+{% endblock %}
