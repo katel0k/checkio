@@ -1,0 +1,86 @@
+body {
+	margin: 0;
+	font-family: 'Montserrat';
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.__react-root {
+	margin: auto;
+}
+
+.nav {
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+	justify-content: space-around;
+	-ms-align-items: center;
+	align-items: center;
+	height: 50px;
+	border-bottom: 2px solid silver;
+	background: #F0F0FA;
+	padding: 5px;
+	box-sizing: border-box;
+}
+
+.logo {
+	display: inline-block;
+	height: 100%;
+}
+
+.logo-img {
+	display: block;
+	height: 100%;
+}
+
+.user {
+	display: inline-block;
+}
+
+.user__log-btn {
+	text-decoration: none;
+	transition: .2s;
+}
+
+.user__log-btn:active {
+	color: black;
+}
+
+.user__log-btn:hover {
+	color: #A02010;
+	cursor: pointer;
+}
+
+.footer {
+	height: 50px;
+	background: silver;
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+	-ms-align-items: center;
+	align-items: center;
+	justify-content: space-around;
+	position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer-span {
+	color: white;
+}
+
+.container {
+	background: #F0F0FA;
+	border: 1px solid silver;
+	border-radius: 10px;
+}
+
+.form__label {
+	margin: 5px;
+	display: block;
+}
