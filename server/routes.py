@@ -8,7 +8,7 @@ import json
 @server.route('/')
 @server.route('/index')
 def index_route():
-    return '<h1>Hello world</h1>'
+    return render_template('index.html', title="Main page")
 
 @server.route('/login')
 def login_route():
@@ -40,7 +40,7 @@ def room_route():
 
 @server.route('/room/<int:room_id>')
 def room_id_route(room_id):
-    return render_template('room.html', title="Home page")
+    return render_template('room.html', title="Game")
     if room_id not in app.room_list:
         return redirect('/')
     

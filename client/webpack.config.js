@@ -1,10 +1,13 @@
 const path = require('path');
 
 module.exports = {
-	entry: './js/room.js',
+	entry: {
+		room: './js/room.js',
+		index: './js/index.js'
+	},
 	mode: 'none',
 	output: {
-		filename: 'bundle.js',
+		filename: '[name].js',
 	},
 	module: {
 		rules: [
