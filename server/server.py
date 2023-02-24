@@ -15,11 +15,6 @@ def get_unique_id():
 def del_unique_id(id):
     ids_set.remove(id)
 
-class Game:
-    id = None
-    move_history = []
-    field = ['0b0b0b0b', 'b0b0b0b0', '0b0b0b0b', '00000000',
-        '00000000', 'w0w0w0w0', '0w0w0w0w', 'w0w0w0w0'] # TODO
     
 
 class Room:
