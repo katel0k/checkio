@@ -1,5 +1,6 @@
 from server import app, server, login_manager
 from flask import request, render_template, send_from_directory, redirect
+from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user
 import json
 from forms import LoginForm, RegisterForm
@@ -67,20 +68,83 @@ def room_route():
 
 @server.route('/room/<int:room_id>')
 def room_id_route(room_id):
-    return render_template('room.html', title="Game")
     if room_id not in app.room_list:
         return redirect('/')
+
+    if not current_user.is_authenticated:
+        return redirect('/login')
     
     room = app.room_list[room_id]
 
+    if request.method != 'GET':
+        return redirect('/')
+
     if room.player_1 is None:
+        # connect first player
         room.player_1 = current_user.id
-        return room.id # TODO        
+        join_room(room)
+        # TODO: render template with user info
+        return render_template('room.html', title="Game")
     elif room.player_2 is None:
+        # connect second player
+        # emit event for the first one that the second player connected and the game starts
         room.player_2 = current_user.id
-        return room.id # TODO
+        join_room(room)
+        emit('both_players_joined', current_user.id, to=room)
+        # render template with both users info
+        # start the game
+
+        return render_template('room.hmtl', title="Game")
     else:
-        pass # TODO
+        # this view assumes that the game has already started
+
+        # TODO:
+        # add spectator
+        # add render for both players
+
+        return render_template('room.html', title="Game", game=room.game) # TODO
+
+@server.route('/room/<int:room_id>/leave')
+def room_id_leave_route(room_id):
+    if room_id not in app.room_list:
+        return redirect('/')
+
+    if not current_user.is_authenticated:
+        return redirect('/login')
+    
+    room = app.room_list[room_id]
+
+    if room.player_1 == current_user.id:
+        room.player_1, room.player_2 = room.player_2, None
+        emit('player_left', to=room)
+        # TODO
+    elif room.player_2 == current_user.id:
+        room.player_2 = None
+        emit('player_left', to=room)
+        # TODO
+
+    return redirect('/')
+        
+@server.route('/room/<int:room_id>/agree')
+def room_id_agree_route(room_id):
+    if room_id not in app.room_list:
+        return redirect('/')
+
+    if not current_user.is_authenticated:
+        return redirect('/login')
+    
+    room = app.room_list[room_id]
+
+    if room.player_1 is None or room.player_2 is None:
+        return redirect('/')
+    
+    room.game = Game()
+
+    return redirect('/room/' + str(room_id))
+
+
+
+
 
 @server.route('/user')
 def user_route():
