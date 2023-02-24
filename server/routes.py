@@ -1,10 +1,10 @@
 from server import app, server, login_manager
 from flask import request, render_template, send_from_directory, redirect
 from flask_socketio import emit, join_room, leave_room
-from flask_login import current_user
+from flask_login import current_user, login_user, logout_user
 import json
 from forms import LoginForm, RegisterForm
-
+from models import User
 
 @server.route('/')
 @server.route('/index')
@@ -14,7 +14,7 @@ def index_route():
 @server.route('/login', methods=['GET', 'POST'])
 def login_route():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect('/')
     form = LoginForm()
     if form.validate_on_submit():
         # TODO: check database for user existance
@@ -22,9 +22,15 @@ def login_route():
         # user = User.query.filter_by(email=form.email.data).first()
         # if user is None or not user.check_password(form.password.data):
         # 	return redirect(url_for('login'))
+        user = User(1)
         login_user(user, remember=form.rem.data)
-        return redirect(url_for('index'))
+        return redirect('/')
     return render_template('login.html', form=form, title='Login')
+
+@server.route('/logout')
+def logout_route ():
+	logout_user()
+	return redirect('/')
 
 @server.route('/register', methods=['GET', 'POST'])
 def register_route():
