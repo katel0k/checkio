@@ -31,10 +31,15 @@ class Rooms extends React.Component {
 
 class Toolbar extends React.Component {
     render() {
-        return (<div className="toolbar">
-                    <button className="connect toolbar__button">Connect</button>
-                    <button className="create toolbar_button">Create</button>
-                </div>);
+        return (
+        <div className="toolbar">
+            <form method="GET" action="/room/random" className="toolbar__form">
+                <input type="submit" className="toolbar_button" value="Connect"/>
+            </form>
+            <form method="POST" action="/room" className="toolbar__form">
+                <input type="submit" className="toolbar__button" value="Create"/>
+            </form>
+        </div>);
     }
 }
 

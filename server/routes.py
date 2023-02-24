@@ -1,10 +1,11 @@
-from server import app, server, login_manager
+from server import app, server, login_manager, Room
 from flask import request, render_template, send_from_directory, redirect
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
 import json
 from forms import LoginForm, RegisterForm
 from models import User
+from random import randrange
 
 @server.route('/')
 @server.route('/index')
@@ -71,6 +72,10 @@ def room_route():
         pass
 
     return '<h1>Room</h1>'
+
+@server.route('/room/random')
+def room_random():
+    return redirect('/room/' + str(randrange(len(app.room_list) - 1)))
 
 @server.route('/room/<int:room_id>')
 def room_id_route(room_id):
