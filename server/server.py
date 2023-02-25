@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from config import Config
 from random import randrange
 from flask_socketio import SocketIO
+import game_logic
 
 # obviously bad code
 ids_set = set()
@@ -14,8 +15,6 @@ def get_unique_id():
     return x
 def del_unique_id(id):
     ids_set.remove(id)
-
-    
 
 class Room:
     id = None
@@ -42,6 +41,6 @@ class Application(object):
         
 app = Application()
 
-
+game_endine = game_logic.GameEngine()
 
 import models, routes

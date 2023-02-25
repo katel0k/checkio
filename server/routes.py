@@ -1,11 +1,11 @@
-from server import app, server, login_manager, Room
+from server import app, server, login_manager, Room, socketio
 from flask import request, render_template, send_from_directory, redirect
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
 import json
 from forms import LoginForm, RegisterForm
 from models import User
-from random import randrange
+import random
 
 @server.route('/')
 @server.route('/index')
@@ -75,7 +75,7 @@ def room_route():
 
 @server.route('/room/random')
 def room_random():
-    return redirect('/room/' + str(randrange(len(app.room_list) - 1)))
+    return redirect('/room/' + random.choice(app.room_list.keys()))
 
 @server.route('/room/<int:room_id>')
 def room_id_route(room_id):
@@ -93,15 +93,15 @@ def room_id_route(room_id):
     if room.player_1 is None:
         # connect first player
         room.player_1 = current_user.id
-        join_room(room)
+        join_room(room_id)
         # TODO: render template with user info
         return render_template('room.html', title="Game")
     elif room.player_2 is None:
         # connect second player
         # emit event for the first one that the second player connected and the game starts
         room.player_2 = current_user.id
-        join_room(room)
-        emit('both_players_joined', current_user.id, to=room)
+        join_room(room_id)
+        emit('both_players_joined', current_user.id, to=room_id)
         # render template with both users info
         # start the game
 
@@ -154,7 +154,10 @@ def room_id_agree_route(room_id):
     return redirect('/room/' + str(room_id))
 
 
+@socketio.on('join', namespace="/room")
+def join_event_handler(sid):
 
+    join_room()
 
 
 @server.route('/user')

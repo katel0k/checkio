@@ -64,18 +64,6 @@ class GameEngine:
         return arr, from_ind, to_ind
 
     def _check_diagonal_for_eating(self, diagonal, game):
-        # prev = None
-        # is_candidate = False
-        # for y, x in diagonal:
-        #     if game.field[y][x].is_empty and prev is None:
-        #         continue
-            
-        #     if game.field[y][x].color != game.order_color and prev is not None:
-        #         return True
-        #     if game.field[y][x].is_queen:
-        #         prev = 
-        #     if game.field[y][x].color == game.order_color:
-
         def _check(diag):
             prev = None
             candidate = False
