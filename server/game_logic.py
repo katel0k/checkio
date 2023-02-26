@@ -91,6 +91,70 @@ class GameEngine:
             return False
 
         return _check(diagonal) or _check(diagonal[::-1])
+    
+    def _check_eating(self, game, y, x):
+        # I sincerely apologize to anyone, who tries to read this code
+        # It just checks if there are any checkers to be eaten, and it is very ugly
+        # I think it is clear that I am familiar with industry standarts such as DRY or some codestyle standarts about function sizes
+        if game.field[y][x].is_queen:
+            diagonal, from_ind, _ = self._get_diagonal_info(GameMove((y, x), (y + 1, x + 1)))
+            eats = False
+            for ty, tx in diagonal[from_ind + 1:]:
+                cell = game.field[ty][tx]
+                if eats:
+                    if cell.is_empty: return True
+                    else: break
+                if cell.is_empty: continue
+                if cell.color != game.order_color:
+                    eats = True
+                if cell.color == game.order_color:
+                    break
+            for ty, tx in diagonal[from_ind + 1::-1]:
+                cell = game.field[ty][tx]
+                if eats:
+                    if cell.is_empty: return True
+                    else: break
+                if cell.is_empty: continue
+                if cell.color != game.order_color:
+                    eats = True
+                if cell.color == game.order_color:
+                    break
+            diagonal, from_ind, _ = self._get_diagonal_info(GameMove((y, x), (y + 1, x - 1)))
+
+            for ty, tx in diagonal[from_ind + 1:]:
+                cell = game.field[ty][tx]
+                if eats:
+                    if cell.is_empty: return True
+                    else: break
+                if cell.is_empty: continue
+                if cell.color != game.order_color:
+                    eats = True
+                if cell.color == game.order_color:
+                    break
+            for ty, tx in diagonal[from_ind + 1:]:
+                cell = game.field[ty][tx]
+                if eats:
+                    if cell.is_empty: return True
+                    else: break
+                if cell.is_empty: continue
+                if cell.color != game.order_color:
+                    eats = True
+                if cell.color == game.order_color:
+                    break
+        else:
+            if (0 <= y + 1 < 8 and 0 <= x + 1 < 8 and 
+                    not game.field[y + 1][x + 1].is_empty and game.field[y + 1][x + 1].color != cell.color):
+                if 0 <= y + 2 < 8 and 0 <= x + 2 < 8 and game.field[y + 2][x + 2].is_empty: return True
+            if (0 <= y + 1 < 8 and 0 <= x - 1 < 8 and 
+                    not game.field[y + 1][x - 1].is_empty and game.field[y + 1][x - 1].color != cell.color):
+                if 0 <= y + 2 < 8 and 0 <= x - 2 < 8 and game.field[y + 2][x - 2].is_empty: return True
+            if (0 <= y - 1 < 8 and 0 <= x + 1 < 8 and 
+                    not game.field[y - 1][x + 1].is_empty and game.field[y - 1][x + 1].color != cell.color):
+                if 0 <= y - 2 < 8 and 0 <= x + 2 < 8 and game.field[y - 2][x + 2].is_empty: return True
+            if (0 <= y - 1 < 8 and 0 <= x - 1 < 8 and 
+                    not game.field[y - 1][x - 1].is_empty and game.field[y - 1][x - 1].color != cell.color):
+                if 0 <= y - 2 < 8 and 0 <= x - 2 < 8 and game.field[y - 2][x - 2].is_empty: return True
+        return False
 
     def check_and_enhance_move(self, game, move):
         move.is_possible = False
@@ -136,16 +200,21 @@ class GameEngine:
             move.is_possible = True
             if y == 0 and cell.color or y == 7 and not cell.color:
                 move.queens = True
+
+            move.changes_order = not self._check_eating(game, move.y, move.x)
             return move
 
         # yes it is full of costyly, and so?
         for i in range(0, 8, 2):
             if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i+1,1)))[0], game): return False
-            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i+1,1)))[0], game): return False
+            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((0, i), (i+1,1)))[0], game): return False
             if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i-1,1)))[0], game): return False
-            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i-1,1)))[0], game): return False
+            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((0, i), (i-1,1)))[0], game): return False
 
         move.is_possible = True
         if y == 0 and cell.color or y == 7 and not cell.color:
             move.queens = True
+        move.changes_order = True
         return move
+
+        # didn't add another param to the move object, "changes_order"
