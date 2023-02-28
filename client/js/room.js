@@ -23,15 +23,15 @@ class App extends React.Component {
 
         socket.on('both_players_joined', (...args) => {
             this.setState({
-                state: accept_state
+                state: playing_state
             });
         });
 
-        socket.on('both_players_agreed', (...args) => {
-            this.setState({
-                state: playing_state
-            })
-        })
+        // socket.on('both_players_agreed', (...args) => {
+        //     this.setState({
+        //         state: playing_state
+        //     })
+        // })
 
         socket.on('player_left', (...args) => {
 
@@ -39,11 +39,11 @@ class App extends React.Component {
     }
     render () {
         switch (this.state.state) {
-            case 'waiting':
+            case waiting_state:
                 return (<WaitingState/>);
-            case 'accept':
-                return (<AcceptanceWaitingState/>);
-            case 'playing':
+            // case 'accept':
+            //     return (<AcceptanceWaitingState/>);
+            case playing_state:
                 return (<PlayingState/>);
         }
     }
@@ -156,6 +156,8 @@ class CheckersGame extends React.Component {
 
 
     render () {
+        console.log(this.props);
+        console.log(this.state);
         return (
         <div className="game">
             <div className="game-stats-container">
@@ -166,7 +168,7 @@ class CheckersGame extends React.Component {
                 <CheckersUI
                     activePlayer={'white'}
                     onClick={this.handleCheckersClick}
-                    field={this.state.field} />
+                    field={this.props.field} />
             </div>
         </div>
         );
@@ -195,13 +197,16 @@ class PlayingState extends React.Component {
         this.state = {
             player1: undefined,
             player2: undefined,
-            field: undefined
+            field: []
         }
     }
     componentDidMount() {
         // useEffect(() => {
+            console.log('hello world');
         fetch(window.location.href + '/game').then(response => response.json())
         .then(obj => {
+            console.log(obj);
+            console.log(this);
             this.setState({
                 field: obj.field,
                 player1Info: obj.player1,
@@ -211,6 +216,7 @@ class PlayingState extends React.Component {
         // });
     }
     render () {
+        console.log(this.state);
         return (
         <div className="app-container">
             <div className="app">

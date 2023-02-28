@@ -6,6 +6,7 @@ import json
 from forms import LoginForm, RegisterForm
 from models import User
 import random
+from game_logic import Game
 
 @server.route('/')
 @server.route('/index')
@@ -163,9 +164,11 @@ def room_id_info_route(room_id):
     room = app.room_list[room_id]
     return json.dumps({
         'field': None if room.game is None else room.game.field,
+        # 'field'json.dumps(self)
         'player1': room.player1,
         'player2': room.player2
-    })
+    }, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 
 @socketio.on('join')
@@ -176,8 +179,10 @@ def join_event_handler(room_id):
         join_room(room)
     elif room.player2 is None:
         room.player2 = current_user.id
+        room.game = Game()
         join_room(room)
         emit('both_players_joined', to=room)
+        
 
 
 @server.route('/user')

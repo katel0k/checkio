@@ -9,6 +9,10 @@ class GameCell:
         self.is_empty = char == '0'
         self.color = char == 'w' or char == 'W'
         self.is_queen = char == 'W' or char == 'B'
+    
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 class Game:
     order_color = True
