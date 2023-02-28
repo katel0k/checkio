@@ -18,8 +18,8 @@ def del_unique_id(id):
 
 class Room:
     id = None
-    player_1 = None
-    player_2 = None
+    player1 = None
+    player2 = None
     game = None
     def __init__(self):
         self.id = get_unique_id()

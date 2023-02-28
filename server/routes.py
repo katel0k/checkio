@@ -1,5 +1,5 @@
 from server import app, server, login_manager, Room, socketio
-from flask import request, render_template, send_from_directory, redirect
+from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
 import json
@@ -75,7 +75,7 @@ def room_route():
 
 @server.route('/room/random')
 def room_random():
-    return redirect('/room/' + random.choice(app.room_list.keys()))
+    return redirect('/room/' + str(random.choice(list(app.room_list.keys()))))
 
 @server.route('/room/<int:room_id>')
 def room_id_route(room_id):
@@ -90,30 +90,33 @@ def room_id_route(room_id):
     if request.method != 'GET':
         return redirect('/')
 
-    if room.player_1 is None:
-        # connect first player
-        room.player_1 = current_user.id
-        join_room(room_id)
-        # TODO: render template with user info
-        return render_template('room.html', title="Game")
-    elif room.player_2 is None:
-        # connect second player
-        # emit event for the first one that the second player connected and the game starts
-        room.player_2 = current_user.id
-        join_room(room_id)
-        emit('both_players_joined', current_user.id, to=room_id)
-        # render template with both users info
-        # start the game
+    return render_template('room.html', title="Game", room_id=room_id)
 
-        return render_template('room.hmtl', title="Game")
-    else:
-        # this view assumes that the game has already started
+    # if room.player1 is None:
+    #     # connect first player
+    #     room.player1 = current_user.id
+    #     # join_room(room_id)
+    #     # emit('joined', namespace="/room")
+    #     # TODO: render template with user info
+    #     return render_template('room.html', title="Game", room_id=room_id)
+    # elif room.player2 is None: # bug: it tries to connect to it after reloading tha page
+    #     # connect second player
+    #     # emit event for the first one that the second player connected and the game starts
+    #     room.player2 = current_user.id
+    #     # join_room(room_id)
+    #     # emit('both_players_joined', current_user.id, to=room_id)
+    #     # render template with both users info
+    #     # start the game
 
-        # TODO:
-        # add spectator
-        # add render for both players
+    #     return render_template('room.html', title="Game")
+    # else:
+    #     # this view assumes that the game has already started
 
-        return render_template('room.html', title="Game", game=room.game) # TODO
+    #     # TODO:
+    #     # add spectator
+    #     # add render for both players
+
+    #     return render_template('room.html', title="Game", game=room.game) # TODO
 
 @server.route('/room/<int:room_id>/leave')
 def room_id_leave_route(room_id):
@@ -125,12 +128,12 @@ def room_id_leave_route(room_id):
     
     room = app.room_list[room_id]
 
-    if room.player_1 == current_user.id:
-        room.player_1, room.player_2 = room.player_2, None
+    if room.player1 == current_user.id:
+        room.player1, room.player2 = room.player2, None
         emit('player_left', to=room)
         # TODO
-    elif room.player_2 == current_user.id:
-        room.player_2 = None
+    elif room.player2 == current_user.id:
+        room.player2 = None
         emit('player_left', to=room)
         # TODO
 
@@ -146,18 +149,35 @@ def room_id_agree_route(room_id):
     
     room = app.room_list[room_id]
 
-    if room.player_1 is None or room.player_2 is None:
+    if room.player1 is None or room.player2 is None:
         return redirect('/')
     
     room.game = Game()
 
     return redirect('/room/' + str(room_id))
 
+@server.route('/room/<int:room_id>/game')
+def room_id_info_route(room_id):
+    if room_id not in app.room_list:
+        return make_response('Incorrect room id, no such room exists', 400)
+    room = app.room_list[room_id]
+    return json.dumps({
+        'field': None if room.game is None else room.game.field,
+        'player1': room.player1,
+        'player2': room.player2
+    })
 
-@socketio.on('join', namespace="/room")
-def join_event_handler(sid):
 
-    join_room()
+@socketio.on('join')
+def join_event_handler(room_id):
+    room = app.room_list[room_id]
+    if room.player1 is None:
+        room.player1 = current_user.id
+        join_room(room)
+    elif room.player2 is None:
+        room.player2 = current_user.id
+        join_room(room)
+        emit('both_players_joined', to=room)
 
 
 @server.route('/user')
