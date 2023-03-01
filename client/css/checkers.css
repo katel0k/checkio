@@ -1,0 +1,87 @@
+.checkers-field {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	grid-template-rows: repeat(8, 1fr);
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+	width: calc(40px * 8);
+	height: calc(40px * 8);
+}
+
+.checkers-cell {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	padding: 7%;
+}
+
+.checkers-cell-white {
+	background: #F0F8F0;
+}
+
+.checkers-cell-black {
+	background: #708090;
+}
+
+.checkers-cell-checked {
+	background: #5792c5; /* green */
+}
+
+.checkers-cell-movable {
+	background: #86a7c3; /* #A0A0A0 */
+}
+
+.checkers-img-ghost {
+	opacity: 0.5;
+}
+
+.checkers-img {
+	width: 100%;
+}
+
+.checkers-UI {
+	display: grid;
+	grid-template: [row1-start] ". top ." 1fr [row1-end]
+					[row2-start] "left main right" 8fr [row2-end]
+					[row3-start] ". bottom ." 1fr [row3-end]
+					/ 1fr 8fr 1fr;
+}
+
+.checkers-UI__top-letters { grid-area: top; }
+.checkers-UI__left-letters { grid-area: left; }
+.checkers-UI__right-letters { grid-area: right; }
+.checkers-UI__bottom-letters { grid-area: bottom; }
+
+.checkers-UI__letters {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.checkers-UI__left-letters, .checkers-UI__right-letters {
+	flex-direction: column-reverse;
+}
+
+.reverse.checkers-UI__left-letters, .reverse.checkers-UI__right-letters {
+	flex-direction: column;
+}
+
+.reverse.checkers-UI__top-letters, .reverse.checkers-UI__bottom-letters {
+	flex-direction: row-reverse;
+}
+
+.checkers {
+	grid-area: main;
+	cursor: pointer;
+}
+
+.reverse.checkers {
+	transform: rotate(180deg);
+}
+
+.checkers-UI__letter {
+	font-family: 'Montserrat';
+}

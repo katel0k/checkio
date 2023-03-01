@@ -53,39 +53,49 @@ class App extends React.Component {
 
 function CheckerImg ({ghost, color, queen}) {
 	return <img className={"checkers-img" + (ghost ? ' checkers-img-ghost' : '') }
-		src={color + (queen ? '-queen' : '') + '.png'}
-		alt={color === 'white' ? 'wh' : 'bl'}/>
+		src={`/client/img/${color ? 'white' : 'black'}${queen ? '-queen' : ''}.png`}
+		alt={color ? 'wh' : 'bl'}/>
 }
 
-function CheckersCell ({checker, bg, pos, state}) {
-	checker = (checker || state & 4) ? <CheckerImg 
-		ghost={state & 4}
-		color={checker.color}
-		queen={checker.queen || state & 8} /> : undefined;
-	return (
-		<div className={'checkers-cell checkers-cell-' + bg + 
-				(state & 1 ? ' checkers-cell-movable' : '') +
-				(state & 2 ? ' checkers-cell-checked' : '')
-				} 
-			pos={pos}>
-			{checker}
-		</div>
-		)
+function CheckersCell ({checker, bg, pos}) {
+	// checker = (checker || state & 4) ? <CheckerImg 
+	// 	ghost={state & 4}
+	// 	color={checker.color}
+	// 	queen={checker.queen || state & 8} /> : undefined;
+	// return (
+	// 	<div className={'checkers-cell checkers-cell-' + bg + 
+	// 			(state & 1 ? ' checkers-cell-movable' : '') +
+	// 			(state & 2 ? ' checkers-cell-checked' : '')
+	// 			} 
+	// 		pos={pos}>
+	// 		{checker}
+	// 	</div>
+	// 	)
+    return (
+        <div className={`checkers-cell checkers-cell-${bg}`}
+                pos={pos}>
+            {checker.is_empty ? undefined : <CheckerImg 
+                    color={checker.color}
+                    queen={checker.queen}
+
+                    />}
+        </div>
+    )
 }
 
 class CheckersField extends React.Component {
 	render () {
+        console.log(this.props.field);
 		// let checked = (i, j) => this.props.checked && (i === this.props.checked.row) && (j === this.props.checked.col);
 		return (
 			<div className="checkers-field" onClick={this.props.onClick}>
 				{this.props.field.reduce((arr, el, i) => 
-					arr.concat(el.map(({value, state}, j) => 
+					arr.concat(el.map((value, j) => 
 						<CheckersCell
 							key={i + '_' + j}
 							pos={i + '_' + j}
 							checker={value}
-							state={state}
-							bg={(i + j) % 2 === 0 ? 'white' : 'black'}
+							bg={(i + j) % 2 == 0 ? 'white' : 'black'}
 						/>
 						)), [])}
 			</div>
@@ -123,6 +133,7 @@ class CheckersGame extends React.Component {
             field: props.field || [],
             fieldSelected: false
         };
+        this.handleCheckersClick = this.handleCheckersClick.bind(this);
     }
     componentDidMount() {
         socket.on('made_move', (move) => {
@@ -140,7 +151,7 @@ class CheckersGame extends React.Component {
     handleCheckersClick(e) {
         let [row, col] = [...e.target.closest('.checkers-cell')
 						.getAttribute('pos').split('_').map(Number)];
-        if (fieldSelected) {
+        if (this.state.fieldSelected) {
             socket.emit('made_move', {
                 x0: this.state.fieldSelected.x,
                 y0: this.state.fieldSelected.y,
@@ -149,15 +160,17 @@ class CheckersGame extends React.Component {
             });
         }
         else {
-            fieldSelected = {x: col, y: row};
+            this.setState({
+                fieldSelected: {x: col, y: row}
+            });
         }
         // socket.emit('made_move', );
     }
 
 
     render () {
-        console.log(this.props);
-        console.log(this.state);
+        // console.log(this.props);
+        // console.log(this.state);
         return (
         <div className="game">
             <div className="game-stats-container">
@@ -202,11 +215,11 @@ class PlayingState extends React.Component {
     }
     componentDidMount() {
         // useEffect(() => {
-            console.log('hello world');
+            // console.log('hello world');
         fetch(window.location.href + '/game').then(response => response.json())
         .then(obj => {
-            console.log(obj);
-            console.log(this);
+            // console.log(obj);
+            // console.log(this);
             this.setState({
                 field: obj.field,
                 player1Info: obj.player1,
@@ -216,7 +229,7 @@ class PlayingState extends React.Component {
         // });
     }
     render () {
-        console.log(this.state);
+        // console.log(this.state);
         return (
         <div className="app-container">
             <div className="app">
