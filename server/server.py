@@ -41,6 +41,6 @@ class Application(object):
         
 app = Application()
 
-game_endine = game_logic.GameEngine()
+game_engine = game_logic.GameEngine()
 
 import models, routes

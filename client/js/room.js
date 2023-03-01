@@ -127,45 +127,14 @@ function CheckersUI ({activePlayer, ...passThrough}) {
 }
 
 class CheckersGame extends React.Component {
-    constructor (props) {
-        super(props);
-        this.state = {
-            field: props.field || [],
-            fieldSelected: false
-        };
-        this.handleCheckersClick = this.handleCheckersClick.bind(this);
-    }
-    componentDidMount() {
-        socket.on('made_move', (move) => {
-            if (!move.is_possible) {
-                // display error message
-                return;
-            }
-            if (move.changes_order) {
-                // change order
-            }
-
-        });
-    }
-
-    handleCheckersClick(e) {
-        let [row, col] = [...e.target.closest('.checkers-cell')
-						.getAttribute('pos').split('_').map(Number)];
-        if (this.state.fieldSelected) {
-            socket.emit('made_move', {
-                x0: this.state.fieldSelected.x,
-                y0: this.state.fieldSelected.y,
-                x: col,
-                y: row
-            });
-        }
-        else {
-            this.setState({
-                fieldSelected: {x: col, y: row}
-            });
-        }
-        // socket.emit('made_move', );
-    }
+    // constructor (props) {
+    //     super(props);
+    //     this.state = {
+    //         field: props.field || [],
+    //         fieldSelected: false
+    //     };
+    //     this.handleCheckersClick = this.handleCheckersClick.bind(this);
+    // }
 
 
     render () {
@@ -180,7 +149,7 @@ class CheckersGame extends React.Component {
             <div className="checkers-UI-container">
                 <CheckersUI
                     activePlayer={'white'}
-                    onClick={this.handleCheckersClick}
+                    onClick={this.props.handleCheckersClick}
                     field={this.props.field} />
             </div>
         </div>
@@ -210,7 +179,9 @@ class PlayingState extends React.Component {
         this.state = {
             player1: undefined,
             player2: undefined,
-            field: []
+            field: [],
+            fieldSelected: false,
+            playerColor: true
         }
     }
     componentDidMount() {
@@ -223,10 +194,49 @@ class PlayingState extends React.Component {
             this.setState({
                 field: obj.field,
                 player1Info: obj.player1,
-                player2Info: obj.player2
+                player2Info: obj.player2,
+                playerColor: obj.player_color
+            });
+        });
+        socket.on('made_move', (json) => {
+            let {field, move, ...rest} = JSON.parse(json);
+            console.log(field, move, this);
+            if (!move.is_possible) {
+                // display error message
+                return;
+            }
+            
+            if (move.changes_order) {
+                // change order
+
+            }
+            this.setState({
+                field: field
             });
         });
         // });
+    }
+
+    handleCheckersClick(e) {
+        let [row, col] = [...e.target.closest('.checkers-cell')
+						.getAttribute('pos').split('_').map(Number)];
+        if (this.state.fieldSelected) {
+            let move = {
+                x0: this.state.fieldSelected.x,
+                y0: this.state.fieldSelected.y,
+                x: col,
+                y: row,
+                player_color: this.state.playerColor // TODO, how can I know this shit????
+            };
+            console.log(move);
+            socket.emit('made_move', room_id, move);
+        }
+        else {
+            this.setState({
+                fieldSelected: {x: col, y: row}
+            });
+        }
+        // socket.emit('made_move', );
     }
     render () {
         // console.log(this.state);
@@ -241,7 +251,8 @@ class PlayingState extends React.Component {
                         history={this.state.game.history || []} /> */}
                 </div>
                 <div className="game-container">
-                    <CheckersGame field={this.state.field}/>
+                    <CheckersGame field={this.state.field} 
+                            handleCheckersClick={this.handleCheckersClick.bind(this)} />
                 </div>
                 <div className="player-container player2">
                     <PlayerInfo info={this.state.player2}/>

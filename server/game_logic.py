@@ -1,5 +1,8 @@
 # regarding color: true <=> white checker, false - opposite
 
+def sign(x):
+    return -1 if x < 0 else 1
+
 class GameCell:
     is_empty = True # if cell is empty, everything else is junk data
     color = True
@@ -10,9 +13,9 @@ class GameCell:
         self.color = char == 'w' or char == 'W'
         self.is_queen = char == 'W' or char == 'B'
     
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
+    # def toJSON(self):
+    #     return json.dumps(self, default=lambda o: o.__dict__, 
+    #         sort_keys=True, indent=4)
 
 class Game:
     order_color = True
@@ -25,12 +28,18 @@ class Game:
 class GameMove:
     field_from = None
     field_to = None
-    def __init__(field_from, field_to):
+    is_possible = False
+    queens = False
+    eats = False
+    changes_order = False
+    player_color = False
+    def __init__(self, field_from, field_to, player_color):
         self.field_from = field_from
         self.field_to = field_to
+        self.player_color = player_color
 
 class GameEngine:
-    def handle_move(self, game, move):
+    def handle_move(self, game, move: GameMove):
         result = self.check_and_enhance_move(game, move)
         if result:
             self.make_move(game, move)
@@ -38,31 +47,36 @@ class GameEngine:
         return result
 
     def make_move(self, game, move):
-        game.field[move.field_to[0]][move.field_to[1]] = game.field[move.field_from[0]][move.field_from[1]]
+        y0, x0 = move.field_from
+        y, x = move.field_to
+        game.field[y][x] = game.field[y0][x0]
+        game.field[y0][x0] = GameCell('0')
         if move.queens:
-            game.field[move.field_to[0]][move.field_to[1]].is_queen = True
-        
-        game.field[move.field_from[0]][move.field_from[1]] = GameCell('0')
+            game.field[y][x].is_queen = True
         if move.eats:
             game.field[move.eats[0]][move.eats[1]] = GameCell('0')
+        if move.changes_order:
+            game.order_color = not game.order_color
 
     def _get_diagonal_info(self, move):
         arr = []
         from_ind = 0
         to_ind = 0
-        if sign(move.y - move.y0) == sign(move.x - move.x0):
+        y0, x0 = move.field_from
+        y, x = move.field_to
+        if sign(y - y0) == sign(x - x0):
             for c in range(-8, 8):
-                if 0 <= move.y0 + c < 8 and 0 <= move.x0 + c < 8:
-                    arr.append(move.y0 + c, move.x0 + c)
+                if 0 <= y0 + c < 8 and 0 <= x0 + c < 8:
+                    arr.append((y0 + c, x0 + c))
                 if c == 0: from_ind = len(arr) - 1
-                if move.y0 + c == move.y and move.x0 + c == move.x:
+                if y0 + c == y and x0 + c == x:
                     to_ind = len(arr) - 1
         else:
             for c in range(-8, 8):
-                if 0 <= move.y0 + c < 8 and 0 <= move.x0 - c < 8:
-                    arr.append(move.y0 + c, move.x0 - c)
+                if 0 <= y0 + c < 8 and 0 <= x0 - c < 8:
+                    arr.append((y0 + c, x0 - c))
                 if c == 0: from_ind = len(arr) - 1
-                if move.y0 + c == move.y and move.x0 - c == move.x:
+                if y0 + c == y and x0 - c == x:
                     to_ind = len(arr) - 1
 
         return arr, from_ind, to_ind
@@ -160,7 +174,7 @@ class GameEngine:
                 if 0 <= y - 2 < 8 and 0 <= x - 2 < 8 and game.field[y - 2][x - 2].is_empty: return True
         return False
 
-    def check_and_enhance_move(self, game, move):
+    def check_and_enhance_move(self, game: Game, move: GameMove):
         move.is_possible = False
 
         y0, x0 = move.field_from
@@ -191,8 +205,8 @@ class GameEngine:
         else:
             if abs(to_ind - from_ind) > 2: return False
             # only remaining option is difference being equal to 2
-            y, x = diagonal[from_ind + direction]
-            cell = game.field[y][x]
+            ty, tx = diagonal[from_ind + direction]
+            cell = game.field[ty][tx]
             if not cell.is_empty and cell.color != game.order_color:
                 move.eats = diagonal[from_ind + direction]
                 move.is_possible = True
@@ -205,15 +219,15 @@ class GameEngine:
             if y == 0 and cell.color or y == 7 and not cell.color:
                 move.queens = True
 
-            move.changes_order = not self._check_eating(game, move.y, move.x)
+            move.changes_order = not self._check_eating(game, y, x)
             return move
 
         # yes it is full of costyly, and so?
         for i in range(0, 8, 2):
-            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i+1,1)))[0], game): return False
-            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((0, i), (i+1,1)))[0], game): return False
-            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i-1,1)))[0], game): return False
-            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((0, i), (i-1,1)))[0], game): return False
+            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i+1,1), False))[0], game): return False
+            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((0, i), (i+1,1), False))[0], game): return False
+            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((i, 0), (i-1,1), False))[0], game): return False
+            if self._check_diagonal_for_eating(self._get_diagonal_info(GameMove((0, i), (i-1,1), False))[0], game): return False
 
         move.is_possible = True
         if y == 0 and cell.color or y == 7 and not cell.color:

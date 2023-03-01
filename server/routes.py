@@ -1,4 +1,4 @@
-from server import app, server, login_manager, Room, socketio
+from server import app, server, login_manager, Room, socketio, game_engine
 from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
@@ -6,7 +6,7 @@ import json
 from forms import LoginForm, RegisterForm
 from models import User
 import random
-from game_logic import Game
+from game_logic import Game, GameMove
 
 @server.route('/')
 @server.route('/index')
@@ -165,8 +165,9 @@ def room_id_info_route(room_id):
     return json.dumps({
         'field': None if room.game is None else room.game.field,
         # 'field'json.dumps(self)
-        'player1': room.player1,
-        'player2': room.player2
+        'player1': room.player1, # TODO: make db call here
+        'player2': room.player2,
+        'player_color': current_user.id == room.player1
     }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
@@ -183,6 +184,15 @@ def join_event_handler(room_id):
         join_room(room)
         emit('both_players_joined', to=room)
         
+@socketio.on('made_move')
+def move_handler(room_id, move):
+    room = app.room_list[room_id]
+    move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
+    game_engine.handle_move(room.game, move) # return value is not needed?
+    emit('made_move', json.dumps({
+        'field': room.game.field, 'move': move
+        }, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4), to=room)
 
 
 @server.route('/user')
