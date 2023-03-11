@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// const { io } = require("socket.io-client");
-// const socket = io();
+const { io } = require("socket.io-client");
+const socket = io();
+
+const url = new URL("http://localhost:5000/");
 
 class App extends React.Component {
     constructor (props) {
@@ -22,20 +24,55 @@ class App extends React.Component {
 }
 
 class Rooms extends React.Component {
-    render() {
-        return (<div className="rooms">
+    constructor (props) {
+        super(props);
+        this.state = {
+            room_list: []
+        };
+    }
+    componentDidMount () {
+        fetch(new URL('room', url)).then(response => response.json())
+        .then(obj => {
+            // console.log(obj);
+            // console.log(this);
+            // console.log('obj', obj);
+            
+            this.setState({
+                room_list: obj.room_list
+            });
+        });
+        // socket.on('room_list_changed', (...args) => {
 
+        // });
+    }
+    render() {
+        console.log(this.state);
+        return (<div className="rooms">
+                    {
+                        this.state.room_list.map((a, i) => 
+                            <div className="room" key={i} >
+                                <span>Room #{a}</span>
+                                <ConnectBtn address={`/room/${a}`}/>
+                            </div>
+                        )
+                    }
                 </div>);
     }
+}
+
+function ConnectBtn (props) {
+    return (
+        <form method="GET" action={props.address} className="toolbar__form">
+            <input type="submit" className="toolbar_button" value="Connect"/>
+        </form>
+    );
 }
 
 class Toolbar extends React.Component {
     render() {
         return (
         <div className="toolbar">
-            <form method="GET" action="/room/random" className="toolbar__form">
-                <input type="submit" className="toolbar_button" value="Connect"/>
-            </form>
+            <ConnectBtn address="/room/random"/>
             <form method="POST" action="/room" className="toolbar__form">
                 <input type="submit" className="toolbar__button" value="Create"/>
             </form>

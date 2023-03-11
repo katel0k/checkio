@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom';
 const { io } = require("socket.io-client");
 const socket = io();
 
+const url = new URL(`http://localhost:5000/room/${room_id}/`);
+console.log(url);
+console.log(new URL('game', url));
+
 const waiting_state = 'waiting';
 const accept_state = 'accept';
 const playing_state = 'playing';
@@ -187,7 +191,7 @@ class PlayingState extends React.Component {
     componentDidMount() {
         // useEffect(() => {
             // console.log('hello world');
-        fetch(window.location.href + '/game').then(response => response.json())
+        fetch(new URL('game', url)).then(response => response.json())
         .then(obj => {
             // console.log(obj);
             // console.log(this);

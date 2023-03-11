@@ -74,7 +74,9 @@ def load_user(email):
 @server.route('/room', methods=['GET', 'POST'])
 def room_route():
     if request.method == 'GET':
-        return json.dumps(app.get_room_list())
+        return json.dumps({
+            "room_list": list(app.get_room_list().keys())
+            })
         # pass
     elif request.method == 'POST':
         room = Room()

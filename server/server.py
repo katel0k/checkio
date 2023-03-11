@@ -33,9 +33,8 @@ login_manager.login_view = 'load_user'
 socketio = SocketIO(server, ping_timeout=10000)
 
 class Application(object):
-    room_list = {}
     def __init__(self):
-        pass
+        self.room_list = {}
     def get_room_list(self):
         return self.room_list
         
