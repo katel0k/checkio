@@ -1,3 +1,3 @@
 source virt/bin/activate
-pip install flask flask_login flask_socketio flask_wtf email_validator
+pip install flask flask_login flask_socketio flask_wtf email_validator blinker psycopg2
 export FLASK_APP=server.py

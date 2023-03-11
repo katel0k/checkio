@@ -7,6 +7,7 @@ from forms import LoginForm, RegisterForm
 from models import User
 import random
 from game_logic import Game, GameMove
+from setup_db import conn, cur
 
 @server.route('/')
 @server.route('/index')
@@ -24,7 +25,11 @@ def login_route():
         # user = User.query.filter_by(email=form.email.data).first()
         # if user is None or not user.check_password(form.password.data):
         # 	return redirect(url_for('login'))
-        user = User(1)
+        # user = User(1)
+        cur.execute("SELECT * FROM users WHERE email=(%s)", (form.email.data, ))
+        user_tuple = cur.fetchone()
+        user = User.get_from_DB(user_tuple)
+        # print(user)
         login_user(user, remember=form.rem.data)
         return redirect('/')
     return render_template('login.html', form=form, title='Login')
@@ -51,13 +56,19 @@ def register_route():
         # user.set_password(form.password.data)
         # db.session.add(user)
         # db.session.commit()
+        cur.execute("INSERT INTO users (email) VALUES (%s)", (form.email.data, ))
+        conn.commit()
+
         return redirect('/login')
     return render_template('register.html', form=form, title='Registration')
 
 
 @login_manager.user_loader
-def load_user(id):
-    return User(id)
+def load_user(email):
+    # raise Exception(user)
+    cur.execute("SELECT * FROM users WHERE email=%s", (email, ))
+    user_tuple = cur.fetchone()
+    return User.get_from_DB(user_tuple)
 
 
 @server.route('/room', methods=['GET', 'POST'])
@@ -129,11 +140,11 @@ def room_id_leave_route(room_id):
     
     room = app.room_list[room_id]
 
-    if room.player1 == current_user.id:
+    if room.player1 == current_user.get_id():
         room.player1, room.player2 = room.player2, None
         emit('player_left', to=room)
         # TODO
-    elif room.player2 == current_user.id:
+    elif room.player2 == current_user.get_id():
         room.player2 = None
         emit('player_left', to=room)
         # TODO
@@ -167,7 +178,7 @@ def room_id_info_route(room_id):
         # 'field'json.dumps(self)
         'player1': room.player1, # TODO: make db call here
         'player2': room.player2,
-        'player_color': current_user.id == room.player1
+        'player_color': current_user.get_id() == room.player1
     }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
@@ -176,10 +187,10 @@ def room_id_info_route(room_id):
 def join_event_handler(room_id):
     room = app.room_list[room_id]
     if room.player1 is None:
-        room.player1 = current_user.id
+        room.player1 = current_user.get_id()
         join_room(room)
     elif room.player2 is None:
-        room.player2 = current_user.id
+        room.player2 = current_user.get_id()
         room.game = Game()
         join_room(room)
         emit('both_players_joined', to=room)

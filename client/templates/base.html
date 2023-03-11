@@ -27,13 +27,14 @@
 			<img src="favicon.ico" class="logo-img">
 		</div>
 		<div class="user">
-			{% if current_user.is_anonymous %}
-				<a class="user__log-btn" href="{{ url_for('login_route') }}">Login</a>
-			{% else %}
+			{% if current_user.is_authenticated %}
 				<div class="user__info">
 					<span class="user__FIO">{{current_user.FIO}}</span>
 				</div>
 				<a class="user__log-btn" href="{{ url_for('logout_route') }}">Logout</a>
+				
+			{% else %}
+				<a class="user__log-btn" href="{{ url_for('login_route') }}">Login</a>
 			{% endif %}
 		</div>
 	</div>
