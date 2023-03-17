@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(120) UNIQUE,
-    password_hash VARCHAR(120),
+    password_hash VARCHAR(120)
 
     );
 
