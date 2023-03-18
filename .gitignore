@@ -3,4 +3,4 @@ package-lock.json
 server/virt
 __pycache__/
 dist/
-init_db
+server/database
