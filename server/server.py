@@ -17,12 +17,11 @@ def del_unique_id(id):
     ids_set.remove(id)
 
 class Room:
-    id = None
-    player1 = None
-    player2 = None
-    game = None
     def __init__(self):
         self.id = get_unique_id()
+        self.player1 = None
+        self.player2 = None
+        self.game = None
 
 server = Flask(__name__, static_folder="../client", template_folder="../client/templates")
 server.config.from_object(Config)
@@ -30,7 +29,7 @@ server.config.from_object(Config)
 login_manager = LoginManager(server)
 login_manager.login_view = 'load_user'
 
-socketio = SocketIO(server, ping_timeout=10000)
+socketio = SocketIO(server, ping_timeout=10000, logger=False)
 
 class Application(object):
     def __init__(self):

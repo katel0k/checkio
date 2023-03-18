@@ -177,6 +177,7 @@ def room_id_info_route(room_id):
     room = app.room_list[room_id]
     return json.dumps({
         'field': None if room.game is None else room.game.field,
+        'order': room.game.order_color,
         # 'field'json.dumps(self)
         'player1': room.player1, # TODO: make db call here
         'player2': room.player2,

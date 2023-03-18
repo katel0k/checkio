@@ -197,25 +197,31 @@ class PlayingState extends React.Component {
             // console.log(this);
             this.setState({
                 field: obj.field,
+                order: obj.order,
                 player1Info: obj.player1,
                 player2Info: obj.player2,
                 playerColor: obj.player_color
             });
         });
         socket.on('made_move', (json) => {
-            let {field, move, ...rest} = JSON.parse(json);
+            let {field, move, order, ...rest} = JSON.parse(json);
             console.log(field, move, this);
             if (!move.is_possible) {
                 // display error message
+                this.setState({
+                    fieldSelected: false
+                });
                 return;
             }
             
-            if (move.changes_order) {
-                // change order
+            // if (move.changes_order) {
+            //     // change order
 
-            }
+            // }
             this.setState({
-                field: field
+                field: field,
+                order: order,
+                fieldSelected: false
             });
         });
         // });
@@ -225,6 +231,15 @@ class PlayingState extends React.Component {
         let [row, col] = [...e.target.closest('.checkers-cell')
 						.getAttribute('pos').split('_').map(Number)];
         if (this.state.fieldSelected) {
+            if (this.state.field[this.state.fieldSelected.y][this.state.fieldSelected.x].is_empty) {
+                this.setState({
+                    fieldSelected: false
+                });
+                return;
+            }
+            else if (col == this.state.fieldSelected.x && row == this.state.fieldSelected.y) {
+                return;
+            }
             let move = {
                 x0: this.state.fieldSelected.x,
                 y0: this.state.fieldSelected.y,
@@ -236,9 +251,11 @@ class PlayingState extends React.Component {
             socket.emit('made_move', room_id, move);
         }
         else {
-            this.setState({
-                fieldSelected: {x: col, y: row}
-            });
+            if (!this.state.field[row][col].is_empty) {
+                this.setState({
+                    fieldSelected: {x: col, y: row}
+                });
+            }
         }
         // socket.emit('made_move', );
     }
@@ -255,6 +272,7 @@ class PlayingState extends React.Component {
                         history={this.state.game.history || []} /> */}
                 </div>
                 <div className="game-container">
+                    <span>{this.state.order ? 'white' : 'black'}</span>
                     <CheckersGame field={this.state.field} 
                             handleCheckersClick={this.handleCheckersClick.bind(this)} />
                 </div>
