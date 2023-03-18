@@ -66,8 +66,10 @@ def register_route():
 @login_manager.user_loader
 def load_user(email):
     # raise Exception(user)
+    # raise Exception(email)
     cur.execute("SELECT * FROM users WHERE email=%s", (email, ))
     user_tuple = cur.fetchone()
+    if user_tuple is None: return None
     return User.get_from_DB(user_tuple)
 
 
