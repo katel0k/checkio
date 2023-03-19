@@ -63,14 +63,14 @@ def register_route():
     return render_template('register.html', form=form, title='Registration')
 
 
-@login_manager.user_loader
-def load_user(email):
-    # raise Exception(user)
-    # raise Exception(email)
-    cur.execute("SELECT * FROM users WHERE email=%s", (email, ))
-    user_tuple = cur.fetchone()
-    if user_tuple is None: return None
-    return User.get_from_DB(user_tuple)
+# @login_manager.user_loader
+# def load_user(email):
+#     # raise Exception(user)
+#     # raise Exception(email)
+#     cur.execute("SELECT * FROM users WHERE email=%s", (email, ))
+#     user_tuple = cur.fetchone()
+#     if user_tuple is None: return None
+#     return User.get_from_DB(user_tuple)
 
 
 @server.route('/room', methods=['GET', 'POST'])

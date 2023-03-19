@@ -1,7 +1,7 @@
 # regarding color: true <=> white checker, false - opposite
 import sys # for debug
 
-def sign(x):
+def sign(x: int):
     return -1 if x < 0 else 1
 
 class GameCell:

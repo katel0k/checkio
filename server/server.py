@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_login import LoginManager
-from config import Config
+import config
 from random import randrange
 from flask_socketio import SocketIO
 import game_logic
@@ -24,7 +24,7 @@ class Room:
         self.game = None
 
 server = Flask(__name__, static_folder="../client", template_folder="../client/templates")
-server.config.from_object(Config)
+server.config.from_object('config')
 
 login_manager = LoginManager(server)
 login_manager.login_view = 'load_user'
