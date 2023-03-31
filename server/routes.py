@@ -20,16 +20,6 @@ def login_route():
         return redirect('/')
     form = LoginForm()
     if form.validate_on_submit():
-        # TODO: check database for user existance
-        
-        # user = User.query.filter_by(email=form.email.data).first()
-        # if user is None or not user.check_password(form.password.data):
-        # 	return redirect(url_for('login'))
-        # user = User(1)
-        # cur.execute("SELECT * FROM users WHERE email=(%s)", (form.email.data, ))
-        # user_tuple = cur.fetchone()
-        # user = User.get_from_DB(user_tuple)
-        # print(user)
         try:
             user = User.login_user(form.email.data, form.password.data)
         except LoginError:
@@ -50,19 +40,6 @@ def register_route():
         return redirect('/')
     form = RegisterForm()
     if form.validate_on_submit():
-        # TODO: add user to database
-
-
-        # user = User(FIO=form.get_FIO(),
-        # 		email=form.email.data,
-        # 		avatar_src="unauthorized.jpg",
-        # 		money=10000,
-        # 		rating=2000)
-        # user.set_password(form.password.data)
-        # db.session.add(user)
-        # db.session.commit()
-        # cur.execute("INSERT INTO users (email) VALUES (%s)", (form.email.data, ))
-        # conn.commit()
         try:
             user = User.register_new_user(form.email.data, form.password.data, form.nickname.data)
             login_user(user, remember=True) # TODO: no rem field exists yet
@@ -70,16 +47,6 @@ def register_route():
         except RegisterError:
             return redirect('/register') # TODO: pass error message here
     return render_template('register.html', form=form, title='Registration')
-
-
-# @login_manager.user_loader
-# def load_user(email):
-#     # raise Exception(user)
-#     # raise Exception(email)
-#     cur.execute("SELECT * FROM users WHERE email=%s", (email, ))
-#     user_tuple = cur.fetchone()
-#     if user_tuple is None: return None
-#     return User.get_from_DB(user_tuple)
 
 
 @server.route('/room', methods=['GET', 'POST'])

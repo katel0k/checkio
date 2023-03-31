@@ -15,28 +15,65 @@ class RegisterError(Exception):
     def __init__(self, msg=None):
         super().__init__(msg)
 
-
+# TODO: separate into another file
+# TODO: write database module for all transactions
 class User(UserMixin):
     def __init__(self, **kwargs):
         super()
         self.id = kwargs['id']
         self.email = kwargs['email']
-        self.password_hash = kwargs['password_hash']
+        self._password_hash = kwargs['password_hash'] # да, костыль)) Нужен т.к. в бд хранятся только хеши
         self.nickname = kwargs['nickname']
         self.rating = kwargs['rating']
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    def __update_field(self, field):
+        cur.execute('''
+            UPDATE users
+            SET %s=%s WHERE id=%s
+        ''', (field, self[field], self.id))
+        conn.commit()
+
+    @property
+    def password(self):
+        return self._password_hash
+    @password.setter
+    def password(self, value):
+        self._password_hash = generate_password_hash(value)
+        self.__update_field('password_hash')
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self._password_hash, password)
+    
+    @property
+    def email(self):
+        return self._email
+    @email.setter
+    def email(self, value):
+        self._email = value
+        self.__update_field('email')
+
+    @property
+    def nickname(self):
+        return self._nickname
+    @nickname.setter
+    def nickname(self, value):
+        self._nickname = value
+        self.__update_field('nickname')
+
+    @property
+    def rating(self):
+        return self._rating
+    @rating.setter
+    def rating(self, value):
+        self._rating = value
+        self.__update_field('rating')
+
 
     @staticmethod
     def register_new_user(email, password, nickname):
         '''Регистрирует нового пользователя в базе данных
             Выдает ValueError если пользователь уже был в базе данных
         '''
-        # print(email, file=stderr)
         if User.__fetch_user(email=email) is not None:
             raise RegisterError
         cur.execute(
@@ -68,15 +105,6 @@ class User(UserMixin):
         '''Загружает пользователя из базы данных по его айдишнику, 
             нужно для плагина flask_login'''
         return User.__fetch_user(id=id)
-        # cur.execute('''
-        #     SELECT * FROM users WHERE id=%s
-        # ''', (id,))
-
-        # res = cur.fetchone()
-        # if res is None:
-        #     return None
-        
-        # return User(**User.__transform_db_output(res))
 
     @staticmethod
     def login_user(email, password):
