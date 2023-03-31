@@ -1,3 +1,3 @@
-class Config(object):
-    DEBUG = True
-    SECRET_KEY = 'shaurma'
+# class Config(object):
+DEBUG = True
+SECRET_KEY = 'shaurma'

@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_login import LoginManager
-import config
+# from config import Config
 from random import randrange
 from flask_socketio import SocketIO
 import game_logic

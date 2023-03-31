@@ -4,7 +4,7 @@ from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
 import json
 from forms import LoginForm, RegisterForm
-from models import User
+from models import *
 import random
 from game_logic import Game, GameMove
 from setup_db import conn, cur
@@ -26,10 +26,15 @@ def login_route():
         # if user is None or not user.check_password(form.password.data):
         # 	return redirect(url_for('login'))
         # user = User(1)
-        cur.execute("SELECT * FROM users WHERE email=(%s)", (form.email.data, ))
-        user_tuple = cur.fetchone()
-        user = User.get_from_DB(user_tuple)
+        # cur.execute("SELECT * FROM users WHERE email=(%s)", (form.email.data, ))
+        # user_tuple = cur.fetchone()
+        # user = User.get_from_DB(user_tuple)
         # print(user)
+        try:
+            user = User.login_user(form.email.data, form.password.data)
+        except LoginError:
+            return redirect('/login') # TODO: pass an error here
+        
         login_user(user, remember=form.rem.data)
         return redirect('/')
     return render_template('login.html', form=form, title='Login')
@@ -56,10 +61,14 @@ def register_route():
         # user.set_password(form.password.data)
         # db.session.add(user)
         # db.session.commit()
-        cur.execute("INSERT INTO users (email) VALUES (%s)", (form.email.data, ))
-        conn.commit()
-
-        return redirect('/login')
+        # cur.execute("INSERT INTO users (email) VALUES (%s)", (form.email.data, ))
+        # conn.commit()
+        try:
+            user = User.register_new_user(form.email.data, form.password.data, form.nickname.data)
+            login_user(user, remember=True) # TODO: no rem field exists yet
+            return redirect('/')
+        except RegisterError:
+            return redirect('/register') # TODO: pass error message here
     return render_template('register.html', form=form, title='Registration')
 
 
