@@ -1,4 +1,4 @@
-from server import app, server, login_manager, Room, socketio, game_engine
+from server import app, server, login_manager, socketio, game_engine
 from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
@@ -57,7 +57,8 @@ def room_route():
             })
         # pass
     elif request.method == 'POST':
-        room = Room()
+        room = Room.make_new_room()
+        # room = Room()
         app.room_list[room.id] = room
         return redirect('room/' + str(room.id))
     else:
@@ -77,7 +78,7 @@ def room_id_route(room_id):
     if not current_user.is_authenticated:
         return redirect('/login')
     
-    room = app.room_list[room_id]
+    # room = app.room_list[room_id]
 
     if request.method != 'GET':
         return redirect('/')
@@ -131,8 +132,8 @@ def room_id_leave_route(room_id):
 
     return redirect('/')
         
-@server.route('/room/<int:room_id>/agree')
-def room_id_agree_route(room_id):
+@server.route('/room/<int:room_id>/play')
+def room_id_play_route(room_id):
     if room_id not in app.room_list:
         return redirect('/')
 
@@ -167,14 +168,16 @@ def room_id_info_route(room_id):
 @socketio.on('join')
 def join_event_handler(room_id):
     room = app.room_list[room_id]
-    if room.player1 is None:
-        room.player1 = current_user.get_id()
-        join_room(room)
-    elif room.player2 is None:
-        room.player2 = current_user.get_id()
-        room.game = Game()
-        join_room(room)
-        emit('both_players_joined', to=room)
+    room.add_viewer(current_user)
+    join_room(room)
+    # if room.player1 is None:
+    #     room.player1 = current_user.get_id()
+    #     join_room(room)
+    # elif room.player2 is None:
+    #     room.player2 = current_user.get_id()
+    #     room.game = Game()
+    #     join_room(room)
+    #     emit('both_players_joined', to=room)
         
 @socketio.on('made_move')
 def move_handler(room_id, move):

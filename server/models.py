@@ -145,15 +145,25 @@ class User(UserMixin):
         return self.__str__()
 
 class Viewer:
-    def __init__(self):
-        pass
+    def __init__(self, user_id, room_id):
+        self.user_id = user_id
+        self.room_id = room_id
+
     @staticmethod
     def make_new_viewer(user, room):
         '''Делает нового наблюдателя для комнаты room из пользователя user'''
-        pass
+        cur.execute('''INSERT INTO viewers 
+            (user_id, room_id) VALUES (%s, %s)''',
+            (user.id, room.id))
+        conn.commit()
+        return Viewer(user.id, room.id)
     def leave_room(self):
         '''Дописывает в поле time_left время, когда он покинул комнату'''
-        pass
+        cur.execute('''UPDATE viewers 
+                time_left=NOW()::TIMESTAMP 
+                WHERE user_id=%s AND room_id=%s''', 
+                (self.user_id, self.room_id))
+        conn.commit()
 
 
 class Player:
@@ -238,7 +248,7 @@ class Room:
     @staticmethod
     def make_new_room():
         '''Создает новую пустую комнату'''
-        cur.execute('''INSERT INTO rooms () VALUES ()''')
+        cur.execute('''INSERT INTO rooms DEFAULT VALUES''')
         conn.commit()
         cur.execute('''SELECT max(id) FROM rooms''')
         res = cur.fetchone() # TODO: проблемы с асинхронностью??
