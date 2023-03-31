@@ -4,6 +4,7 @@ from enum import Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from sys import stderr
 from server import login_manager
+from psycopg2 import sql
 
 class LoginError(Exception):
     '''Такая ошибка происходит при неудачной попытке входа в аккаунт'''
@@ -21,16 +22,17 @@ class User(UserMixin):
     def __init__(self, **kwargs):
         super()
         self.id = kwargs['id']
-        self.email = kwargs['email']
-        self._password_hash = kwargs['password_hash'] # да, костыль)) Нужен т.к. в бд хранятся только хеши
-        self.nickname = kwargs['nickname']
-        self.rating = kwargs['rating']
+        self._email = kwargs['email']
+        self._password_hash = kwargs['password_hash']
+        self._nickname = kwargs['nickname']
+        self._rating = kwargs['rating']
 
-    def __update_field(self, field):
-        cur.execute('''
+    def __update_field(self, field, value):
+        cur.execute(
+            sql.SQL('''
             UPDATE users
-            SET %s=%s WHERE id=%s
-        ''', (field, self[field], self.id))
+            SET {}=%s WHERE id=%s
+        ''').format(sql.Identifier(field)), (value, self.id))
         conn.commit()
 
     @property
@@ -39,7 +41,7 @@ class User(UserMixin):
     @password.setter
     def password(self, value):
         self._password_hash = generate_password_hash(value)
-        self.__update_field('password_hash')
+        self.__update_field('password_hash', self.password)
 
     def check_password(self, password):
         return check_password_hash(self._password_hash, password)
@@ -50,7 +52,7 @@ class User(UserMixin):
     @email.setter
     def email(self, value):
         self._email = value
-        self.__update_field('email')
+        self.__update_field('email', self.email)
 
     @property
     def nickname(self):
@@ -58,7 +60,7 @@ class User(UserMixin):
     @nickname.setter
     def nickname(self, value):
         self._nickname = value
-        self.__update_field('nickname')
+        self.__update_field('nickname', self.nickname)
 
     @property
     def rating(self):
@@ -66,7 +68,7 @@ class User(UserMixin):
     @rating.setter
     def rating(self, value):
         self._rating = value
-        self.__update_field('rating')
+        self.__update_field('rating', self.rating)
 
 
     @staticmethod
@@ -142,6 +144,16 @@ class User(UserMixin):
     def __repr__(self):
         return self.__str__()
 
+class Viewer:
+    def __init__(self):
+        pass
+    @staticmethod
+    def make_new_viewer(user, room):
+        '''Делает нового наблюдателя для комнаты room из пользователя user'''
+        pass
+    def leave_room(self):
+        '''Дописывает в поле time_left время, когда он покинул комнату'''
+        pass
 
 
 class Player:
@@ -200,62 +212,112 @@ class RoomState(Enum):
     DEAD = 2
 
 class Room:
-    ''' Этот класс соответствует записям в таблице rooms в базе данных.
-    Он также используется для хранения комнат во время работы сервера. 
-    Потому у него есть поля player_white, player_black: Player
-    '''
-    def __init__(self, 
-                 player_white: bool = None, 
-                 player_black: bool = None,
-                 state: RoomState = RoomState.WAITING,
-                 game: Game = None):
-        self.player_white = None # для удобства и быстрого доступа
-        self.player_black = None
+    def __init__(self, id):
+        self.id = id
+        self._state = RoomState.WAITING
+        self._viewers = {}
+        self._game = None
 
-        self.state = RoomState.WAITING
-        self.game = None
+    @property
+    def state(self):
+        return self._state
+    @state.setter
+    def state(self, value):
+        self._state = value
+        self.__update_field('state', value)
+        # cur.execute() TODO: make here room_history insert
 
-    def make_new_db_record(self):
-        '''Создает запись, соответсвующую объекту, в базе данных'''
-        cur.execute('''INSERT INTO rooms 
-            () VALUES ()''')
+    def __update_field(self, field, value):
+        cur.execute(
+            sql.SQL('''
+            UPDATE rooms
+            SET {}=%s WHERE id=%s
+        ''').format(sql.Identifier(field)), (value, self.id))
         conn.commit()
 
     @staticmethod
-    def get_from_db_record(id: int):
-        '''Создает комнату из '''
-        cur.execute('''''') # TODO: сделать запрос, получающий полную комнату
-        # conn.getchone()
+    def make_new_room():
+        '''Создает новую пустую комнату'''
+        cur.execute('''INSERT INTO rooms () VALUES ()''')
+        conn.commit()
+        cur.execute('''SELECT max(id) FROM rooms''')
+        res = cur.fetchone() # TODO: проблемы с асинхронностью??
+        return Room(id=res[0])
+    
+    
+    def has_viewer(self, user):
+        return user.id in self._viewers
+    
+    def add_viewer(self, user):
+        if self.has_viewer(user):
+            return # TODO: добавить сообщение об ошибке?
+        viewer = Viewer.make_new_viewer(user, self)
+        self._viewers[viewer.user_id] = viewer
+        
+    def remove_viewer(self, viewer):
+        if not self.has_viewer(viewer):
+            return # TODO: добавить сообщение об ошибке?
+        viewer.leave_room()
+        self._viewers.pop(viewer.id)
+    
 
 
-    def set_player(self, player: Player):
-        '''Устанавливает игрока в свободный цвет и автоматически назначает этот цвет игроку'''
-        if self.player_white is None:
-            self.player_white = player
-            player.set_color(True)
-        elif self.player_black is None:
-            self.player_balck = player
-            player.set_color(False)
+    # ''' Этот класс соответствует записям в таблице rooms в базе данных.
+    # Он также используется для хранения комнат во время работы сервера. 
+    # Потому у него есть поля player_white, player_black: Player
+    # '''
+    # def __init__(self, 
+    #              player_white: bool = None, 
+    #              player_black: bool = None,
+    #              state: RoomState = RoomState.WAITING,
+    #              game: Game = None):
+    #     self.player_white = None # для удобства и быстрого доступа
+    #     self.player_black = None
 
-    def is_ready_to_start(self):
-        '''Возвращает True, если комната готова для начала игры'''
-        return self.player_white is None or self.player_black is None
+    #     self.state = RoomState.WAITING
+    #     self.game = None
 
-    def start_game(self):
-        '''Пытается начать новую игру
-        Если хотя бы один из игроков не установлен или произошла другая ошибка, возвращает False
-        Иначе возвращает True'''
-        if not self.is_ready_to_start():
-            return False
+    # def make_new_db_record(self):
+    #     '''Создает запись, соответсвующую объекту, в базе данных'''
+    #     cur.execute('''INSERT INTO rooms 
+    #         () VALUES ()''')
+    #     conn.commit()
 
-        self.game = Game()
+    # @staticmethod
+    # def get_from_db_record(id: int):
+    #     '''Создает комнату из '''
+    #     cur.execute('''''') # TODO: сделать запрос, получающий полную комнату
+    #     # conn.getchone()
 
-        return True
+
+    # def set_player(self, player: Player):
+    #     '''Устанавливает игрока в свободный цвет и автоматически назначает этот цвет игроку'''
+    #     if self.player_white is None:
+    #         self.player_white = player
+    #         player.set_color(True)
+    #     elif self.player_black is None:
+    #         self.player_balck = player
+    #         player.set_color(False)
+
+    # def is_ready_to_start(self):
+    #     '''Возвращает True, если комната готова для начала игры'''
+    #     return self.player_white is None or self.player_black is None
+
+    # def start_game(self):
+    #     '''Пытается начать новую игру
+    #     Если хотя бы один из игроков не установлен или произошла другая ошибка, возвращает False
+    #     Иначе возвращает True'''
+    #     if not self.is_ready_to_start():
+    #         return False
+
+    #     self.game = Game()
+
+    #     return True
 
 
-    def __str__(self):
-        return ('<Room white: %s, black: %s, state: %s, game: %s>' %
-                self.player_white, self.player_black, self.state, self.game)
+    # def __str__(self):
+    #     return ('<Room white: %s, black: %s, state: %s, game: %s>' %
+    #             self.player_white, self.player_black, self.state, self.game)
 
 
 
