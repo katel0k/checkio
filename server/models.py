@@ -1,43 +1,110 @@
 from flask_login import UserMixin
 from setup_db import cur, conn
 from enum import Enum
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from server import login_manager
 
+class LoginError(Exception):
+    '''Такая ошибка происходит при неудачной попытке входа в аккаунт'''
+    def __init__(self, msg=None):
+        super(msg)
+
+class RegisterError(Exception):
+    '''Такая ошибка происходит при неудачной попытке регистрации пользователя'''
+    def __init__(self, msg=None):
+        super(msg)
+
+
 class User(UserMixin):
-    def __init__(self, email, password_hash, username):
+    def __init__(self, id=None, **kwargs):
         super()
-        self.email = email
-        self.password_hash = password_hash
-        self.username = username
+        self.id = kwargs['id']
+        self.email = kwargs['email']
+        self.password_hash = kwargs['password_hash']
+        self.nickname = kwargs['nickname']
+        self.rating = kwargs['rating']
 
-    def make_new_db_record(self):
-        cur.execute('''INSERT INTO users 
-            (email, password_hash, username) 
-            VALUES (%s, %s, %s)''',
-            (self.email,
-            self.password_hash,
-            self.username)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    @staticmethod
+    def register_new_user(email, password_hash, username):
+        '''Регистрирует нового пользователя в базе данных
+            Выдает ValueError если пользователь уже был в базе данных
+        '''
+        cur.execute('''
+            SELECT * FROM users WHERE email=%s
+        ''', (email))
+        if conn.fetchone() is not None:
+            raise RegisterError
+        cur.execute(
+            '''INSERT INTO users 
+                (email, password_hash, username) 
+                VALUES (%s, %s, %s)''',
+            (email,
+             password_hash,
+             username)
         )
-        # TODO: get user id here
         conn.commit()
+        return User()
+    
+    @staticmethod
+    def __transform_db_output(info):
+        '''Эта функция нужна для общности трансформации
+            здесь проще будет менять структуру БД'''
+        return {
+            'id': info[1],
+            'username': info[2],
+            'email': info[3],
+            'password_hash': info[4],
+            'rating': info[5]
+        }
 
-    @login_manager.user_loader # doesn't seem to be a correct decision
-    def load_user(self):
-        pass # TODO:
+    @staticmethod
+    @login_manager.user_loader
+    def load_user(id):
+        '''Загружает пользователя из базы данных по его айдишнику, 
+            нужно для плагина flask_login'''
+        
+        cur.execute('''
+            SELECT * FROM users WHERE id=%s
+        ''', (id))
 
-    # @staticmethod
-    # def make_new_user():
+        res = conn.fetchone()
+        if res is None:
+            return None
+        
+        return User(**User.__transform_db_output(res))
 
+    @staticmethod
+    def login_user(email, password):
+        '''Входит пользователем в аккаунт и возвращает объект пользователя
+            Выдает ValueError если такой пользователь не существует или пароль неверный'''
+        cur.execute('''
+            SELECT * FROM users WHERE email=%s
+        ''', (email))
+        res = conn.fetchone()
+        if res is None:
+            raise LoginError('Такой пользователь не найден')
+        user = User(**User.__transform_db_output(res))
+        if not user.check_password(password):
+            raise LoginError('Неправильный пароль')
+        return user
 
     def get_id(self):
-        return self.email # TODO: temporary
+        '''Нужно для плагина flask_login'''
+        return self.id
 
-    # def get_from_DB(db_tuple):
-    #     u = User(db_tuple[1]) # TODO: omg wtf
-    #     return u
+    def __str__(self):
+        return 'id: %s, email: %s, username: %s' % (self.id, self.email, self.username)
     def __repr__(self):
         return self.__str__()
+
+
 
 class Player:
     def __init__(self, user_id, game_id):
@@ -156,8 +223,8 @@ class Room:
 
 
 
-class ActivePlayer:
-    def __init__(self):
-        pass
-    def __repr__(self):
-        return self.__str__()
+# class ActivePlayer:
+#     def __init__(self):
+#         pass
+#     def __repr__(self):
+#         return self.__str__()
