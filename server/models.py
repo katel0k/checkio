@@ -167,34 +167,36 @@ class Viewer:
 
 
 class Player:
-    def __init__(self, user_id, game_id):
+    def __init__(self, user_id, game_id, is_white):
         self.user_id = user_id
         self.game_id = game_id
-        self.is_white = True
+        self.is_white = is_white
 
-    def make_new_db_record(self):
+    @staticmethod
+    def make_new_player(user_id, game_id, is_white):
         cur.execute('''
             INSERT INTO players
             (user_id, game_id, is_white) VALUES
             (%s, %s, %s)
         ''', (
-            self.user_id, self.game_id, self.is_white
+            user_id, game_id, is_white
         ))
         conn.commit()
+        return Player(user_id, game_id, is_white)
 
-    @staticmethod
-    def get_from_db_record(user_id, game_id, is_white):
-        pass # TODO: make SELECT query to accomodate this request
+    # @staticmethod
+    # def get_from_db_record(user_id, game_id, is_white):
+    #     pass # TODO: make SELECT query to accomodate this request
 
-    def assign_color(self, color):
-        self.is_white = color
+    # def assign_color(self, color):
+    #     self.is_white = color
     
-    def __str__(self):
-        return ('<Player user_id: %s, game_id: %s, is_white: %s>' %
-                (self.user_id, self.game_id, self.is_white))
+    # def __str__(self):
+    #     return ('<Player user_id: %s, game_id: %s, is_white: %s>' %
+    #             (self.user_id, self.game_id, self.is_white))
     
-    def __repr__(self):
-        return self.__str__()
+    # def __repr__(self):
+    #     return self.__str__()
     
 class GameMove:
     def __init__(self):
@@ -203,18 +205,62 @@ class GameMove:
         return self.__str__()
 
 class Game:
-    def __init__(self):
-        self.order_color = True
-        self.field = list(map(lambda s:
-            [GameCell(x) for x in s],
-                ['0b0b0b0b', 'b0b0b0b0', '0b0b0b0b', '00000000',
-                '00000000', 'w0w0w0w0', '0w0w0w0w', 'w0w0w0w0'])) # i'm just lazy:)
-        # self.move_history = []
-    def make_move(self, move):
-        pass
-    # pass
-    def __repr__(self):
-        return self.__str__()
+    def __init__(self, id, room_id):
+        self.id = id
+        self.room_id = room_id
+    
+    @staticmethod
+    def make_new_game(room_id, white_user, black_user):
+        cur.execute('''
+            INSERT INTO games (room_id) VALUES (%s)
+        ''', (room_id,))
+        conn.commit()
+        # TODO: TERRIBLE CODE
+        cur.execute('''
+            SELECT max(id) FROM games WHERE room_id=%s
+        ''', (room_id,))
+        res = cur.fetchone()
+        game = Game(res[0], room_id)
+        game.white_player = Player.make_new_player(white_user.user_id, room_id, True)
+        game.black_player = Player.make_new_player(black_user.user_id, room_id, False)
+        return game
+
+
+class GameSetter:
+    # def __init__(self):
+    #     self.order_color = True
+    #     self.field = list(map(lambda s:
+    #         [GameCell(x) for x in s],
+    #             ['0b0b0b0b', 'b0b0b0b0', '0b0b0b0b', '00000000',
+    #             '00000000', 'w0w0w0w0', '0w0w0w0w', 'w0w0w0w0'])) # i'm just lazy:)
+    #     # self.move_history = []
+    # def make_move(self, move):
+    #     pass
+    # # pass
+    # def __repr__(self):
+    #     return self.__str__()
+    def __init__(self, user):
+        # TODO: если расширять этот интерфейс для других игр, ему потребуется переработка
+        # тогда можно будет сделать его более полным
+        # также надо будет добавить сеттер/геттер для настроек игры
+        self.creator = user
+        self.opponent = None
+        self.game = None
+
+    @staticmethod
+    def create_game(user):
+        # TODO: add game types
+        return GameSetter(user)
+    
+    def join_user(self, user):
+        self.opponent = user
+
+    def is_playing(self):
+        return self.game is not None
+
+    def start_game(self):
+        self.game = Game.make_new_game(self.creator, self.opponent)
+        
 
 class RoomState(Enum):
     WAITING = 0
@@ -226,7 +272,7 @@ class Room:
         self.id = id
         self._state = RoomState.WAITING
         self._viewers = {}
-        self._game = None
+        self._game_setter = None
 
     @property
     def state(self):
@@ -250,6 +296,7 @@ class Room:
         '''Создает новую пустую комнату'''
         cur.execute('''INSERT INTO rooms DEFAULT VALUES''')
         conn.commit()
+        # TODO: TERRIBLE CODE
         cur.execute('''SELECT max(id) FROM rooms''')
         res = cur.fetchone() # TODO: проблемы с асинхронностью??
         return Room(id=res[0])
