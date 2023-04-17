@@ -132,22 +132,22 @@ def room_id_leave_route(room_id):
 
     return redirect('/')
         
-@server.route('/room/<int:room_id>/play')
-def room_id_play_route(room_id):
-    if room_id not in app.room_list:
-        return redirect('/')
+# @server.route('/room/<int:room_id>/play')
+# def room_id_play_route(room_id):
+#     if room_id not in app.room_list:
+#         return redirect('/')
 
-    if not current_user.is_authenticated:
-        return redirect('/login')
+#     if not current_user.is_authenticated:
+#         return redirect('/login')
     
-    room = app.room_list[room_id]
+#     room = app.room_list[room_id]
 
-    if room.player1 is None or room.player2 is None:
-        return redirect('/')
+#     if room.player1 is None or room.player2 is None:
+#         return redirect('/')
     
-    room.game = Game()
+#     room.game = Game()
 
-    return redirect('/room/' + str(room_id))
+#     return redirect('/room/' + str(room_id))
 
 @server.route('/room/<int:room_id>/game')
 def room_id_info_route(room_id):

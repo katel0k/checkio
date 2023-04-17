@@ -304,13 +304,30 @@ class EndGameState extends React.Component  {
     }
 }
 
+class PlayerAcceptanceBtn extends React.Component {
+    constructor (props) {
+        super(props);
+        this.handleClick = props.handleClick;
+    }
+    render () {
+        return (
+            <button onclick={this.props.handleClick}></button>
+        );
+    }
+}
+
 class AcceptanceWaitingState extends React.Component {
     constructor (props) { super(props); }
+    handleAccept (player) {
+        // player == true - белый игрок, false - черный
+        // io.emit('set_player')
+    }
     render () {
         return (
             <div className="form-wrapper">
-                <form action="leave"><input type="submit" value="Выйти из игры"/></form>
-                <form action="agree"><input type="submit" value="Принять игру"/></form>
+
+                {/* <form action="leave"><input type="submit" value="Выйти из игры"/></form> */}
+                {/* <form action="agree"><input type="submit" value="Принять игру"/></form> */}
             </div>
         )
     }
