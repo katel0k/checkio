@@ -55,10 +55,8 @@ def room_route():
         return json.dumps({
             "room_list": list(app.get_room_list().keys())
             })
-        # pass
     elif request.method == 'POST':
         room = Room.make_new_room()
-        # room = Room()
         app.room_list[room.id] = room
         return redirect('room/' + str(room.id))
     else:
@@ -72,44 +70,16 @@ def room_random():
 
 @server.route('/room/<int:room_id>')
 def room_id_route(room_id):
-    if room_id not in app.room_list:
-        return redirect('/')
-
     if not current_user.is_authenticated:
         return redirect('/login')
     
-    # room = app.room_list[room_id]
+    if room_id not in app.room_list:
+        return redirect('/')
 
     if request.method != 'GET':
         return redirect('/')
 
     return render_template('room.html', title="Game", room_id=room_id)
-
-    # if room.player1 is None:
-    #     # connect first player
-    #     room.player1 = current_user.id
-    #     # join_room(room_id)
-    #     # emit('joined', namespace="/room")
-    #     # TODO: render template with user info
-    #     return render_template('room.html', title="Game", room_id=room_id)
-    # elif room.player2 is None: # bug: it tries to connect to it after reloading tha page
-    #     # connect second player
-    #     # emit event for the first one that the second player connected and the game starts
-    #     room.player2 = current_user.id
-    #     # join_room(room_id)
-    #     # emit('both_players_joined', current_user.id, to=room_id)
-    #     # render template with both users info
-    #     # start the game
-
-    #     return render_template('room.html', title="Game")
-    # else:
-    #     # this view assumes that the game has already started
-
-    #     # TODO:
-    #     # add spectator
-    #     # add render for both players
-
-    #     return render_template('room.html', title="Game", game=room.game) # TODO
 
 @server.route('/room/<int:room_id>/leave')
 def room_id_leave_route(room_id):
@@ -131,23 +101,6 @@ def room_id_leave_route(room_id):
         # TODO
 
     return redirect('/')
-        
-# @server.route('/room/<int:room_id>/play')
-# def room_id_play_route(room_id):
-#     if room_id not in app.room_list:
-#         return redirect('/')
-
-#     if not current_user.is_authenticated:
-#         return redirect('/login')
-    
-#     room = app.room_list[room_id]
-
-#     if room.player1 is None or room.player2 is None:
-#         return redirect('/')
-    
-#     room.game = Game()
-
-#     return redirect('/room/' + str(room_id))
 
 @server.route('/room/<int:room_id>/game')
 def room_id_info_route(room_id):
@@ -170,24 +123,18 @@ def join_event_handler(room_id):
     room = app.room_list[room_id]
     room.add_viewer(current_user)
     join_room(room)
-    # if room.player1 is None:
-    #     room.player1 = current_user.get_id()
-    #     join_room(room)
-    # elif room.player2 is None:
-    #     room.player2 = current_user.get_id()
-    #     room.game = Game()
-    #     join_room(room)
-    #     emit('both_players_joined', to=room)
         
 @socketio.on('made_move')
 def move_handler(room_id, move):
     room = app.room_list[room_id]
     move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
-    game_engine.handle_move(room.game, move) # return value is not needed?
+    game_engine.handle_move(room.game, move)
     emit('made_move', json.dumps({
         'field': room.game.field, 'move': move
         }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4), to=room)
+
+
 
 
 @server.route('/user')

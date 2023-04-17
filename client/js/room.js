@@ -17,12 +17,8 @@ class App extends React.Component {
         this.state = {
             state: waiting_state
         }
-        // this.state = {
-        //     state: props.state
-        // }
     }
     componentDidMount() {
-        // that is incorrect
         socket.emit('join', room_id);
 
         socket.on('both_players_joined', (...args) => {
@@ -30,12 +26,6 @@ class App extends React.Component {
                 state: playing_state
             });
         });
-
-        // socket.on('both_players_agreed', (...args) => {
-        //     this.setState({
-        //         state: playing_state
-        //     })
-        // })
 
         socket.on('player_left', (...args) => {
 
@@ -51,9 +41,9 @@ class App extends React.Component {
                 return (<PlayingState/>);
         }
     }
+
 }
 
-/// pasted from previous project, untested -----------------------------------------------------------------
 
 function CheckerImg ({ghost, color, queen}) {
 	return <img className={"checkers-img" + (ghost ? ' checkers-img-ghost' : '') }
@@ -62,19 +52,6 @@ function CheckerImg ({ghost, color, queen}) {
 }
 
 function CheckersCell ({checker, bg, pos}) {
-	// checker = (checker || state & 4) ? <CheckerImg 
-	// 	ghost={state & 4}
-	// 	color={checker.color}
-	// 	queen={checker.queen || state & 8} /> : undefined;
-	// return (
-	// 	<div className={'checkers-cell checkers-cell-' + bg + 
-	// 			(state & 1 ? ' checkers-cell-movable' : '') +
-	// 			(state & 2 ? ' checkers-cell-checked' : '')
-	// 			} 
-	// 		pos={pos}>
-	// 		{checker}
-	// 	</div>
-	// 	)
     return (
         <div className={`checkers-cell checkers-cell-${bg}`}
                 pos={pos}>
@@ -89,8 +66,7 @@ function CheckersCell ({checker, bg, pos}) {
 
 class CheckersField extends React.Component {
 	render () {
-        console.log(this.props.field);
-		// let checked = (i, j) => this.props.checked && (i === this.props.checked.row) && (j === this.props.checked.col);
+        // console.log(this.props.field);
 		return (
 			<div className="checkers-field" onClick={this.props.onClick}>
 				{this.props.field.reduce((arr, el, i) => 
@@ -131,19 +107,7 @@ function CheckersUI ({activePlayer, ...passThrough}) {
 }
 
 class CheckersGame extends React.Component {
-    // constructor (props) {
-    //     super(props);
-    //     this.state = {
-    //         field: props.field || [],
-    //         fieldSelected: false
-    //     };
-    //     this.handleCheckersClick = this.handleCheckersClick.bind(this);
-    // }
-
-
     render () {
-        // console.log(this.props);
-        // console.log(this.state);
         return (
         <div className="game">
             <div className="game-stats-container">
@@ -189,12 +153,8 @@ class PlayingState extends React.Component {
         }
     }
     componentDidMount() {
-        // useEffect(() => {
-            // console.log('hello world');
         fetch(new URL('game', url)).then(response => response.json())
         .then(obj => {
-            // console.log(obj);
-            // console.log(this);
             this.setState({
                 field: obj.field,
                 order: obj.order,
@@ -213,18 +173,12 @@ class PlayingState extends React.Component {
                 });
                 return;
             }
-            
-            // if (move.changes_order) {
-            //     // change order
-
-            // }
             this.setState({
                 field: field,
                 order: order,
                 fieldSelected: false
             });
         });
-        // });
     }
 
     handleCheckersClick(e) {
@@ -257,19 +211,13 @@ class PlayingState extends React.Component {
                 });
             }
         }
-        // socket.emit('made_move', );
     }
     render () {
-        // console.log(this.state);
         return (
         <div className="app-container">
             <div className="app">
                 <div className="player-container player1">
                     <PlayerInfo info={this.state.player1}/>
-                    {/* <PlayerInfo
-                        player={this.state.player2}
-                        field={this.state.game.field}
-                        history={this.state.game.history || []} /> */}
                 </div>
                 <div className="game-container">
                     <span>{this.state.order ? 'white' : 'black'}</span>
@@ -278,40 +226,9 @@ class PlayingState extends React.Component {
                 </div>
                 <div className="player-container player2">
                     <PlayerInfo info={this.state.player2}/>
-                    {/* <PlayerInfo
-                        player={this.state.player1}
-                        field={this.state.game.field}
-                        history={this.state.game.history || []} 
-                        reverse={true} /> */}
                 </div>
             </div>
         </div>
-        );
-    }
-}
-
-class BrokenGameState extends React.Component {
-    constructor (props) { super(props); }
-    render() {
-        return (<div>Broken</div>);
-    }
-}
-
-class EndGameState extends React.Component  {
-    constructor (props) { super(props); }
-    render() {
-        return (<div>Game ended</div>);
-    }
-}
-
-class PlayerAcceptanceBtn extends React.Component {
-    constructor (props) {
-        super(props);
-        this.handleClick = props.handleClick;
-    }
-    render () {
-        return (
-            <button onclick={this.props.handleClick}></button>
         );
     }
 }
@@ -325,13 +242,11 @@ class AcceptanceWaitingState extends React.Component {
     render () {
         return (
             <div className="form-wrapper">
-
-                {/* <form action="leave"><input type="submit" value="Выйти из игры"/></form> */}
-                {/* <form action="agree"><input type="submit" value="Принять игру"/></form> */}
+                <form action="join"><input type="submit" value="Зайти за черных"/></form>
+                <form action="join"><input type="submit" value="Зайти за белых"/></form>
             </div>
         )
     }
-
 }
 
 ReactDOM.render(<App/>, document.querySelector('.__react-root'));
