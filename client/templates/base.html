@@ -1,44 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-	<meta charset="UTF-8">
-	<title>{{title}}</title>
-	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-	<link rel="stylesheet" href="/client/css/common.css">
-	{% block styles %} {% endblock %}
-	<style type="text/css">
-		/* @font-face {
-			font-family: Montserrat;
-			src: url({{ url_for('static', filename='Montserrat-regular.ttf') }});
-		}
-		@font-face {
-			font-family: Open-Sans;
-			src: url({{ url_for('static', filename='OpenSans-regular.ttf') }});
-		}
-		@font-face {
-			font-family: Roboto;
-			src: url({{ url_for('static', filename='Roboto-regular.ttf') }});
-		} */
-	</style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/client/css/style.min.css">
+    <link rel="stylesheet" href="/client/css/bootstrap-reboot.min.css">
+    <link rel="stylesheet" href="/client/css/bootstrap-grid.min.css">
+    <title>Шашки</title>
 </head>
 <body>
-	<div class="nav">
-		<div class="logo">
-			<img src="favicon.ico" class="logo-img">
-		</div>
-		<div class="user">
-			{% if current_user.is_authenticated %}
-				<div class="user__info">
-					<span class="user__FIO">{{current_user.FIO}}</span>
-				</div>
-				<a class="user__log-btn" href="{{ url_for('logout_route') }}">Logout</a>
-				
-			{% else %}
-				<a class="user__log-btn" href="{{ url_for('login_route') }}">Login</a>
-			{% endif %}
-		</div>
-	</div>
-	{% block react %} {% endblock %}
-	
+    <script src="https://kit.fontawesome.com/416de93d8d.js" crossorigin="anonymous"></script>
+    <header>
+        <nav>
+            <div class="container">
+                <ul class="menu">
+                    <li class="menu__item"><a href="#" class="menu__link">Главная</a></li>
+                    <li class="menu__item" data-modal="game"><a href="#" class="menu__link">Создать новую игру</a></li>
+                    <li class="menu__item" data-modal="register"><a href="#" class="menu__link">Войти</a></li>
+                </ul>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="overlay">
+        <div class="modal" id="sign" > 
+            <!-- consultation = sign -->
+            <div class="modal__close">&times;</div>
+            <div class="modal__subtitle">Войти в систему</div>
+
+            <form class="feed-form" action="#">
+                <input name="name" required placeholder="Ваше имя" type="text">
+                <input name="phone" required placeholder="Ваш телефон" >
+                <input name="email" required placeholder="Ваш e-mail" type="text">
+
+                <button data-modal="sign" class="btn btn_submit" >войти</button>
+            </form>
+        </div>
+
+        <div class="modal" id="register" > 
+            <div class="modal__close">&times;</div>
+            <div class="modal__subtitle">Зарегистрироваться</div>
+            <div class="modal__descr">Уже есть аккаунт? <span><a class="sign-up" href="#">Войти</a></span></div>
+            <form class="feed-form" action="#">
+                <input name="name" required placeholder="Логин" type="text">
+                <input name="password" required placeholder="Пароль" type="password">
+                <input name="password2" required placeholder="Подтвердите пароль" type="password">
+
+                <button data-modal="register" class="btn btn_submit" >Зарегистрироваться</button>
+            </form>
+        </div>
+
+        <div class="modal" id="game" > 
+            <div class="modal__close">&times;</div>
+            <div class="modal__subtitle">Создать новую игру</div>
+            <form class="feed-form" action="#">
+                <div class="feed-form__box">
+                    <input type="checkbox" id="privat">
+                    <label for="privat">Приватная</label>
+                </div>
+
+                
+                <div class="select">
+                    <input class="select__input" type="hidden" name="">
+                    <div class="select__head">Вариант игры</div>
+                    <ul class="select__list" style="display: none;">
+                        <li class="select__item">Блиц: 5 минут</li>
+                        <li class="select__item">Рапид: 15 минут</li>
+                        <li class="select__item">Классические: 45 минут</li>
+                        <li class="select__item">Русские шашки: 1 час 20 минут </li>
+                        <li class="select__item">Без времени</li>
+                    </ul>
+                </div>
+
+                <button data-modal="register" class="btn btn_submit" >Создать комнату</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/client/dist/register_jquery.js"></script>
+    {% block react %} {% endblock %}
 </body>
-</html>

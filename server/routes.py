@@ -12,7 +12,7 @@ from setup_db import conn, cur
 @server.route('/')
 @server.route('/index')
 def index_route():
-    return render_template('v2/index.html', title="Main page")
+    return render_template('index.html', title="Main page")
 
 @server.route('/login', methods=['GET', 'POST'])
 def login_route():
