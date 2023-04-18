@@ -52,7 +52,7 @@ class Rooms extends React.Component {
                         this.state.room_list.map((a, i) => 
                             <div className="room" key={i} >
                                 <span>Room #{a}</span>
-                                <ConnectBtn address={`/room/${a}`}/>
+                                <ConnectBtn address={`/room/${a}/`}/>
                             </div>
                         )
                     }

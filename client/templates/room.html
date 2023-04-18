@@ -7,8 +7,10 @@
 
 {% block react %}
 	<div id="game" class="__react-root"></div>
-	<script type="text/javascript">
+	<!-- <script type="text/javascript">
+		const room_state={{ room_state|safe }};
+		const 
 		const room_id={{ room_id|safe }};
-	</script>
+	</script> -->
 	<script type="text/javascript" src="/client/dist/room.js"></script>
 {% endblock %}

@@ -8,6 +8,7 @@ from models import *
 import random
 from game_logic import Game, GameMove
 from setup_db import conn, cur
+import sys
 
 @server.route('/')
 @server.route('/index')
@@ -58,7 +59,7 @@ def room_route():
     elif request.method == 'POST':
         room = Room.make_new_room()
         app.room_list[room.id] = room
-        return redirect('room/' + str(room.id))
+        return redirect(f'room/{room.id}/')
     else:
         pass
 
@@ -68,7 +69,7 @@ def room_route():
 def room_random():
     return redirect('/room/' + str(random.choice(list(app.room_list.keys()))))
 
-@server.route('/room/<int:room_id>')
+@server.route('/room/<int:room_id>/')
 def room_id_route(room_id):
     if not current_user.is_authenticated:
         return redirect('/login')
@@ -80,6 +81,15 @@ def room_id_route(room_id):
         return redirect('/')
 
     return render_template('room.html', title="Game", room_id=room_id)
+
+@server.route('/room/<int:room_id>/info')
+def room_id_info_route(room_id):
+    if room_id not in app.room_list:
+        return redirect('/')
+    return json.dumps({
+        'id': room_id,
+        'state': app.room_list[room_id]._state
+        })
 
 @server.route('/room/<int:room_id>/leave')
 def room_id_leave_route(room_id):
@@ -103,39 +113,50 @@ def room_id_leave_route(room_id):
     return redirect('/')
 
 @server.route('/room/<int:room_id>/game')
-def room_id_info_route(room_id):
+def room_id_game_route(room_id):
     if room_id not in app.room_list:
         return make_response('Incorrect room id, no such room exists', 400)
     room = app.room_list[room_id]
+    print(current_user.get_id(), file=sys.stderr)
+    print(room._game_setter.game.white_player, file=sys.stderr)
     return json.dumps({
-        'field': None if room.game is None else room.game.field,
-        'order': room.game.order_color,
-        # 'field'json.dumps(self)
-        'player1': room.player1, # TODO: make db call here
-        'player2': room.player2,
-        'player_color': current_user.get_id() == room.player1
+        'field': None if room._game_setter.game is None else room._game_setter.game.game.field,
+        'order': room._game_setter.game.game.order_color,
+        'white_player': room._game_setter.game.white_player.user_id,
+        'white_player': room._game_setter.game.black_player.user_id,
+        'player_color': current_user.get_id() == room._game_setter.game.white_player.user_id
     }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
 
 @socketio.on('join')
 def join_event_handler(room_id):
+    # print(room_id, file=sys.stderr)
     room = app.room_list[room_id]
     room.add_viewer(current_user)
     join_room(room)
         
+
+
+
+@socketio.on('join_game')
+def join_game_event_handler(room_id):
+    room = app.room_list[room_id]
+    room.set_player(current_user.get_id())
+    if room.is_ready_to_start():
+        room.start_game()
+        # room._game_setter.game
+        socketio.emit('ready_to_start', to=room)
+
 @socketio.on('made_move')
 def move_handler(room_id, move):
     room = app.room_list[room_id]
     move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
-    game_engine.handle_move(room.game, move)
+    game_engine.handle_move(room._game_setter.game.game, move)
     emit('made_move', json.dumps({
-        'field': room.game.field, 'move': move
+        'field': room._game_setter.game.game.field, 'move': move
         }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4), to=room)
-
-
-
 
 @server.route('/user')
 def user_route():

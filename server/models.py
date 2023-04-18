@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sys import stderr
 from server import login_manager
 from psycopg2 import sql
+import game_logic
 
 class LoginError(Exception):
     '''Такая ошибка происходит при неудачной попытке входа в аккаунт'''
@@ -175,7 +176,7 @@ class Player:
     @staticmethod
     def make_new_player(user_id, game_id, is_white):
         cur.execute('''
-            INSERT INTO players
+            INSERT INTO user_games
             (user_id, game_id, is_white) VALUES
             (%s, %s, %s)
         ''', (
@@ -196,6 +197,7 @@ class Game:
         self.room_id = room_id
         self.white_player = None
         self.black_player = None
+        self.game = game_logic.Game()
     
     @staticmethod
     def make_new_game(room_id, white_user, black_user):
@@ -209,16 +211,17 @@ class Game:
         ''', (room_id,))
         res = cur.fetchone()
         game = Game(res[0], room_id)
-        game.white_player = Player.make_new_player(white_user.user_id, room_id, True)
-        game.black_player = Player.make_new_player(black_user.user_id, room_id, False)
+        game.white_player = Player.make_new_player(white_user, game.id, True)
+        game.black_player = Player.make_new_player(black_user, game.id, False)
         return game
 
 
 class GameSetter:
-    def __init__(self, user):
+    def __init__(self, room_id, user):
         # TODO: если расширять этот интерфейс для других игр, ему потребуется переработка
         # тогда можно будет сделать его более полным
         # также надо будет добавить сеттер/геттер для настроек игры
+        self.room_id = room_id
         self.creator = user
         self.opponent = None
         self.game = None
@@ -233,20 +236,23 @@ class GameSetter:
 
     def is_playing(self):
         return self.game is not None
+    
+    def is_ready(self):
+        return self.opponent is not None and self.creator is not None
 
     def start_game(self):
-        self.game = Game.make_new_game(self.creator, self.opponent)
+        self.game = Game.make_new_game(self.room_id, self.creator, self.opponent)
         
 
-class RoomState(Enum):
-    WAITING = 0
-    PLAYING = 1
-    DEAD = 2
+# class RoomState(Enum):
+WAITING = 'waiting'
+PLAYING = 'playing'
+DEAD = 'dead'
 
 class Room:
     def __init__(self, id):
         self.id = id
-        self._state = RoomState.WAITING
+        self._state = WAITING
         self._viewers = {}
         self._game_setter = None
 
@@ -292,3 +298,15 @@ class Room:
             return # TODO: добавить сообщение об ошибке?
         viewer.leave_room()
         self._viewers.pop(viewer.id)
+    
+    def set_player(self, user):
+        if self._game_setter is None:
+            self._game_setter = GameSetter(self.id, user)
+        else:
+            self._game_setter.join_user(user)
+    
+    def is_ready_to_start(self):
+        return self._game_setter is not None and self._game_setter.is_ready()
+    
+    def start_game(self):
+        self._game_setter.start_game()

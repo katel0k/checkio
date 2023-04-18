@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 const { io } = require("socket.io-client");
 const socket = io();
 
-const url = new URL(`http://localhost:5000/room/${room_id}/`);
-console.log(url);
-console.log(new URL('game', url));
+// const url = new URL(`http://localhost:5000/room/${room_id}/`);
+// const url = 
+// console.log(url);
+// console.log(new URL('game', url));
 
 const waiting_state = 'waiting';
 const accept_state = 'accept';
@@ -19,26 +20,50 @@ class App extends React.Component {
         }
     }
     componentDidMount() {
-        socket.emit('join', room_id);
-
-        socket.on('both_players_joined', (...args) => {
+        fetch(new URL('info', location.href)).then(response => response.json())
+        .then(obj => {
+            console.log(obj, this);
+            this.setState({
+                state: obj.state,
+                room_id: obj.id
+            });
+            return obj;
+            // this.setState({
+            //     field: obj.field,
+            //     order: obj.order,
+            //     player1Info: obj.player1,
+            //     player2Info: obj.player2,
+            //     playerColor: obj.player_color
+            // });
+        }).then(obj => {
+            console.log(obj);
+            socket.emit('join', obj.id);
+        });
+        
+        socket.on('ready_to_start', (...args) => {
             this.setState({
                 state: playing_state
             });
         });
+        // socket.on('')
+        // socket.on('both_players_joined', (...args) => {
+        //     this.setState({
+        //         state: playing_state
+        //     });
+        // });
 
-        socket.on('player_left', (...args) => {
+        // socket.on('player_left', (...args) => {
 
-        });
+        // });
     }
     render () {
         switch (this.state.state) {
             case waiting_state:
-                return (<WaitingState/>);
+                return (<WaitingState room_id={this.state.room_id}/>);
             // case 'accept':
             //     return (<AcceptanceWaitingState/>);
             case playing_state:
-                return (<PlayingState/>);
+                return (<PlayingState room_id={this.state.room_id}/>);
         }
     }
 
@@ -127,15 +152,15 @@ class CheckersGame extends React.Component {
 
 /// pasted from previous project, untested -----------------------------------------------------------------
 
-class WaitingState extends React.Component {
-    constructor(props) {
-        super(props);
+// class WaitingState extends React.Component {
+//     constructor(props) {
+//         super(props);
         
-    }
-    render() {
-        return (<div>Waiting</div>);
-    }
-}
+//     }
+//     render() {
+//         return (<div>Waiting</div>);
+//     }
+// }
 
 function PlayerInfo(props) {
     return (<div></div>);
@@ -149,17 +174,18 @@ class PlayingState extends React.Component {
             player2: undefined,
             field: [],
             fieldSelected: false,
-            playerColor: true
-        }
+            playerColor: true,
+            room_id: props.room_id
+        };
     }
     componentDidMount() {
-        fetch(new URL('game', url)).then(response => response.json())
+        fetch(new URL('game', location.href)).then(response => response.json())
         .then(obj => {
             this.setState({
                 field: obj.field,
                 order: obj.order,
-                player1Info: obj.player1,
-                player2Info: obj.player2,
+                whitePlayerInfo: obj.white_player,
+                blackPlayerInfo: obj.black_player,
                 playerColor: obj.player_color
             });
         });
@@ -182,6 +208,7 @@ class PlayingState extends React.Component {
     }
 
     handleCheckersClick(e) {
+        console.log(this.state);
         let [row, col] = [...e.target.closest('.checkers-cell')
 						.getAttribute('pos').split('_').map(Number)];
         if (this.state.fieldSelected) {
@@ -199,10 +226,10 @@ class PlayingState extends React.Component {
                 y0: this.state.fieldSelected.y,
                 x: col,
                 y: row,
-                player_color: this.state.playerColor // TODO, how can I know this shit????
+                player_color: this.state.playerColor
             };
             console.log(move);
-            socket.emit('made_move', room_id, move);
+            socket.emit('made_move', this.state.room_id, move);
         }
         else {
             if (!this.state.field[row][col].is_empty) {
@@ -233,17 +260,24 @@ class PlayingState extends React.Component {
     }
 }
 
-class AcceptanceWaitingState extends React.Component {
+class WaitingState extends React.Component {
     constructor (props) { super(props); }
+    // componentDidMount() {
+    //     socket.on('ready_to_start', (...args) => {
+            
+    //     });
+    // }
     handleAccept (player) {
         // player == true - белый игрок, false - черный
-        // io.emit('set_player')
+        socket.emit('join_game', this.props.room_id);
     }
     render () {
         return (
             <div className="form-wrapper">
-                <form action="join"><input type="submit" value="Зайти за черных"/></form>
-                <form action="join"><input type="submit" value="Зайти за белых"/></form>
+                <button onClick={this.handleAccept.bind(this)}>Зайти за черных</button>
+                <button onClick={this.handleAccept.bind(this)}>Зайти за белых</button>
+                {/* <form action="join"><input type="submit" value="Зайти за черных"/></form> */}
+                {/* <form action="join"><input type="submit" value="Зайти за белых"/></form> */}
             </div>
         )
     }
