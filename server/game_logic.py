@@ -36,6 +36,10 @@ class GameMove:
         self.queens = kwargs.get('queens', False)
         self.eats = kwargs.get('eats', False)
         self.changes_order = kwargs.get('changes_order', False)
+    def __str__(self):
+        # incorrect, redo
+        return str(self.field_from) + ' ' + str(self.field_to) + ' ' + str(self.is_white_player)
+        # return 
 
 class Game:
     def __init__(self, **kwargs):

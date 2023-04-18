@@ -151,9 +151,10 @@ def join_game_event_handler(room_id):
 @socketio.on('made_move')
 def move_handler(room_id, move):
     room = app.room_list[room_id]
+    # room._game_setter.game.handle_move(move)
     move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
     # game_engine.handle_move(room._game_setter.game.game, move)
-    room._game_setter.game.game.handle_move(move)
+    move = room._game_setter.game.handle_move(move)
     emit('made_move', json.dumps({
         'field': room._game_setter.game.game.field, 'move': move
         }, default=lambda o: o.__dict__, 

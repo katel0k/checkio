@@ -22,7 +22,7 @@ class App extends React.Component {
     componentDidMount() {
         fetch(new URL('info', location.href)).then(response => response.json())
         .then(obj => {
-            console.log(obj, this);
+            // console.log(obj, this);
             this.setState({
                 state: obj.state,
                 room_id: obj.id
@@ -36,7 +36,7 @@ class App extends React.Component {
             //     playerColor: obj.player_color
             // });
         }).then(obj => {
-            console.log(obj);
+            // console.log(obj);
             socket.emit('join', obj.id);
         });
         
@@ -77,7 +77,7 @@ function CheckerImg ({is_ghost, is_white, is_queen}) {
 }
 
 function CheckersCell ({checker, bg, pos}) {
-    console.log(checker);
+    // console.log(checker);
     return (
         
         <div className={`checkers-cell checkers-cell-${bg}`}

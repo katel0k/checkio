@@ -6,6 +6,7 @@ from sys import stderr
 from server import login_manager
 from psycopg2 import sql
 import game_logic
+import sys
 
 class LoginError(Exception):
     '''Такая ошибка происходит при неудачной попытке входа в аккаунт'''
@@ -185,11 +186,11 @@ class Player:
         conn.commit()
         return Player(user_id, game_id, is_white)
     
-class GameMove:
-    def __init__(self):
-        pass
-    def __repr__(self):
-        return self.__str__()
+# class GameMove:
+#     def __init__(self):
+#         pass
+#     def __repr__(self):
+#         return self.__str__()
 
 class Game:
     def __init__(self, id, room_id):
@@ -214,6 +215,20 @@ class Game:
         game.white_player = Player.make_new_player(white_user, game.id, True)
         game.black_player = Player.make_new_player(black_user, game.id, False)
         return game
+
+    def handle_move(self, move):
+        print('made move', file=sys.stderr)
+        res = self.game.handle_move(move)
+        if not res: return move
+        cur.execute('''
+            INSERT INTO turns (game_id, index, user_id, body)
+            VALUES (%s, %s, %s, %s)
+        ''', (self.id, 0, 
+              self.white_player.user_id if move.is_white_player else self.black_player.user_id,
+              str(move)))
+        conn.commit()
+        return move
+        # GameMove(move.field_from, move.field_to, move.playerColor)
 
 
 class GameSetter:
