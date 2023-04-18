@@ -70,19 +70,21 @@ class App extends React.Component {
 }
 
 
-function CheckerImg ({ghost, color, queen}) {
-	return <img className={"checkers-img" + (ghost ? ' checkers-img-ghost' : '') }
-		src={`/client/img/${color ? 'white' : 'black'}${queen ? '-queen' : ''}.png`}
-		alt={color ? 'wh' : 'bl'}/>
+function CheckerImg ({is_ghost, is_white, is_queen}) {
+	return <img className={"checkers-img" + (is_ghost ? ' checkers-img-ghost' : '') }
+		src={`/client/img/${is_white ? 'white' : 'black'}${is_queen ? '-queen' : ''}.png`}
+		alt={is_white ? 'wh' : 'bl'}/>
 }
 
 function CheckersCell ({checker, bg, pos}) {
+    console.log(checker);
     return (
+        
         <div className={`checkers-cell checkers-cell-${bg}`}
                 pos={pos}>
             {checker.is_empty ? undefined : <CheckerImg 
-                    color={checker.color}
-                    queen={checker.queen}
+                    is_white={checker.is_white}
+                    is_queen={checker.is_queen}
 
                     />}
         </div>

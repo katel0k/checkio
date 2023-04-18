@@ -1,4 +1,4 @@
-from server import app, server, login_manager, socketio, game_engine
+from server import app, server, login_manager, socketio
 from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
@@ -116,15 +116,15 @@ def room_id_leave_route(room_id):
 def room_id_game_route(room_id):
     if room_id not in app.room_list:
         return make_response('Incorrect room id, no such room exists', 400)
-    room = app.room_list[room_id]
-    print(current_user.get_id(), file=sys.stderr)
-    print(room._game_setter.game.white_player, file=sys.stderr)
+    game_obj = app.room_list[room_id]._game_setter.game
+    # print(current_user.get_id(), file=sys.stderr)
+    # print(room._game_setter.game.white_player, file=sys.stderr)
     return json.dumps({
-        'field': None if room._game_setter.game is None else room._game_setter.game.game.field,
-        'order': room._game_setter.game.game.order_color,
-        'white_player': room._game_setter.game.white_player.user_id,
-        'white_player': room._game_setter.game.black_player.user_id,
-        'player_color': current_user.get_id() == room._game_setter.game.white_player.user_id
+        'field': game_obj.game.field,
+        'order': game_obj.game.is_white_move,
+        'white_player': game_obj.white_player.user_id,
+        'white_player': game_obj.black_player.user_id,
+        'player_color': current_user.get_id() == game_obj.white_player.user_id
     }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
@@ -152,7 +152,8 @@ def join_game_event_handler(room_id):
 def move_handler(room_id, move):
     room = app.room_list[room_id]
     move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
-    game_engine.handle_move(room._game_setter.game.game, move)
+    # game_engine.handle_move(room._game_setter.game.game, move)
+    room._game_setter.game.game.handle_move(move)
     emit('made_move', json.dumps({
         'field': room._game_setter.game.game.field, 'move': move
         }, default=lambda o: o.__dict__, 
