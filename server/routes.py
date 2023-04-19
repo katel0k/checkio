@@ -54,13 +54,12 @@ def register_route():
 def room_route():
     if request.method == 'GET':
         return json.dumps({
-            "room_list": list(map(
+            "room_list": dict(map(
                 lambda room_id:
-                    {
-                        "id": room_id,
+                    (room_id, {
                         "state": app.room_list[room_id]._state,
-                        "players_amount": len(app.room_list[room_id]._viewers)
-                    },
+                        "playersAmount": len(app.room_list[room_id]._viewers)
+                    }),
                 app.room_list
             ))
             })
