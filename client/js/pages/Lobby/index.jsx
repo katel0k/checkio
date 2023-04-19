@@ -13,7 +13,11 @@ class RoomMenu extends React.Component {
         fetch(new URL('room', location.href)).then(response => response.json())
         .then(obj => {
             this.setState({
-                roomList: obj.room_list
+                roomList: obj.room_list.map(
+                    a => ({
+                        id: a.id, state: a.state, playersAmount: a.players_amount
+                    })
+                )
             });
         });
     }
@@ -25,10 +29,10 @@ class RoomMenu extends React.Component {
                     this.state.roomList.map(
                         (room, i) => 
                             <div className="room-menu__entry" key={i}>
-                                <span>{room.index}</span>
+                                <span>{room.id}</span>
                                 <span>{room.state}</span>
                                 <span>{room.playersAmount}</span>
-                                <Link to={"/room/" + room.index}>Подключиться</Link>
+                                <Link to={"/room/" + room.id}>Подключиться</Link>
                             </div>
                     )
                 }
