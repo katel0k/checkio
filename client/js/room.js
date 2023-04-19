@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom';
 const { io } = require("socket.io-client");
 const socket = io();
 
-const url = new URL(`http://localhost:5000/room/${room_id}/`);
-console.log(url);
-console.log(new URL('game', url));
+// const url = new URL(`http://localhost:5000/room/${room_id}/`);
+// const url = 
+// console.log(url);
+// console.log(new URL('game', url));
 
 const waiting_state = 'waiting';
 const accept_state = 'accept';
@@ -17,70 +18,73 @@ class App extends React.Component {
         this.state = {
             state: waiting_state
         }
-        // this.state = {
-        //     state: props.state
-        // }
     }
     componentDidMount() {
-        // that is incorrect
-        socket.emit('join', room_id);
-
-        socket.on('both_players_joined', (...args) => {
+        fetch(new URL('info', location.href)).then(response => response.json())
+        .then(obj => {
+            // console.log(obj, this);
+            this.setState({
+                state: obj.state,
+                room_id: obj.id
+            });
+            return obj;
+            // this.setState({
+            //     field: obj.field,
+            //     order: obj.order,
+            //     player1Info: obj.player1,
+            //     player2Info: obj.player2,
+            //     playerColor: obj.player_color
+            // });
+        }).then(obj => {
+            // console.log(obj);
+            socket.emit('join', obj.id);
+        });
+        
+        socket.on('ready_to_start', (...args) => {
             this.setState({
                 state: playing_state
             });
         });
-
-        // socket.on('both_players_agreed', (...args) => {
+        // socket.on('')
+        // socket.on('both_players_joined', (...args) => {
         //     this.setState({
         //         state: playing_state
-        //     })
-        // })
+        //     });
+        // });
 
-        socket.on('player_left', (...args) => {
+        // socket.on('player_left', (...args) => {
 
-        });
+        // });
     }
     render () {
         switch (this.state.state) {
             case waiting_state:
-                return (<WaitingState/>);
+                return (<WaitingState room_id={this.state.room_id}/>);
             // case 'accept':
             //     return (<AcceptanceWaitingState/>);
             case playing_state:
-                return (<PlayingState/>);
+                return (<PlayingState room_id={this.state.room_id}/>);
         }
     }
+
 }
 
-/// pasted from previous project, untested -----------------------------------------------------------------
 
-function CheckerImg ({ghost, color, queen}) {
-	return <img className={"checkers-img" + (ghost ? ' checkers-img-ghost' : '') }
-		src={`/client/img/${color ? 'white' : 'black'}${queen ? '-queen' : ''}.png`}
-		alt={color ? 'wh' : 'bl'}/>
+function CheckerImg ({is_ghost, is_white, is_queen}) {
+	return <img className={"checkers-img" + (is_ghost ? ' checkers-img-ghost' : '') }
+		src={`/client/img/${is_white ? 'white' : 'black'}${is_queen ? '-queen' : ''}.png`}
+		alt={is_white ? 'wh' : 'bl'}/>
 }
 
 function CheckersCell ({checker, bg, pos}) {
-	// checker = (checker || state & 4) ? <CheckerImg 
-	// 	ghost={state & 4}
-	// 	color={checker.color}
-	// 	queen={checker.queen || state & 8} /> : undefined;
-	// return (
-	// 	<div className={'checkers-cell checkers-cell-' + bg + 
-	// 			(state & 1 ? ' checkers-cell-movable' : '') +
-	// 			(state & 2 ? ' checkers-cell-checked' : '')
-	// 			} 
-	// 		pos={pos}>
-	// 		{checker}
-	// 	</div>
-	// 	)
+    // console.log(checker);
     return (
+        
         <div className={`checkers-cell checkers-cell-${bg}`}
                 pos={pos}>
             {checker.is_empty ? undefined : <CheckerImg 
-                    color={checker.color}
-                    queen={checker.queen}
+                    is_white={checker.is_white}
+                    is_queen={checker.is_queen}
 
                     />}
         </div>
@@ -89,8 +93,7 @@ function CheckersCell ({checker, bg, pos}) {
 
 class CheckersField extends React.Component {
 	render () {
-        console.log(this.props.field);
-		// let checked = (i, j) => this.props.checked && (i === this.props.checked.row) && (j === this.props.checked.col);
+        // console.log(this.props.field);
 		return (
 			<div className="checkers-field" onClick={this.props.onClick}>
 				{this.props.field.reduce((arr, el, i) => 
@@ -131,19 +134,7 @@ function CheckersUI ({activePlayer, ...passThrough}) {
 }
 
 class CheckersGame extends React.Component {
-    // constructor (props) {
-    //     super(props);
-    //     this.state = {
-    //         field: props.field || [],
-    //         fieldSelected: false
-    //     };
-    //     this.handleCheckersClick = this.handleCheckersClick.bind(this);
-    // }
-
-
     render () {
-        // console.log(this.props);
-        // console.log(this.state);
         return (
         <div className="game">
             <div className="game-stats-container">
@@ -163,15 +154,15 @@ class CheckersGame extends React.Component {
 
 /// pasted from previous project, untested -----------------------------------------------------------------
 
-class WaitingState extends React.Component {
-    constructor(props) {
-        super(props);
+// class WaitingState extends React.Component {
+//     constructor(props) {
+//         super(props);
         
-    }
-    render() {
-        return (<div>Waiting</div>);
-    }
-}
+//     }
+//     render() {
+//         return (<div>Waiting</div>);
+//     }
+// }
 
 function PlayerInfo(props) {
     return (<div></div>);
@@ -185,26 +176,23 @@ class PlayingState extends React.Component {
             player2: undefined,
             field: [],
             fieldSelected: false,
-            playerColor: true
-        }
+            playerColor: true,
+            room_id: props.room_id
+        };
     }
     componentDidMount() {
-        // useEffect(() => {
-            // console.log('hello world');
-        fetch(new URL('game', url)).then(response => response.json())
+        fetch(new URL('game', location.href)).then(response => response.json())
         .then(obj => {
-            // console.log(obj);
-            // console.log(this);
             this.setState({
                 field: obj.field,
                 order: obj.order,
-                player1Info: obj.player1,
-                player2Info: obj.player2,
+                whitePlayerInfo: obj.white_player,
+                blackPlayerInfo: obj.black_player,
                 playerColor: obj.player_color
             });
         });
         socket.on('made_move', (json) => {
-            let {field, move, order, ...rest} = JSON.parse(json);
+            let {field, move, ...rest} = JSON.parse(json);
             console.log(field, move, this);
             if (!move.is_possible) {
                 // display error message
@@ -213,21 +201,16 @@ class PlayingState extends React.Component {
                 });
                 return;
             }
-            
-            // if (move.changes_order) {
-            //     // change order
-
-            // }
             this.setState({
                 field: field,
-                order: order,
+                order: move.changes_order ^ move.is_white_player,
                 fieldSelected: false
             });
         });
-        // });
     }
 
     handleCheckersClick(e) {
+        console.log(this.state);
         let [row, col] = [...e.target.closest('.checkers-cell')
 						.getAttribute('pos').split('_').map(Number)];
         if (this.state.fieldSelected) {
@@ -245,10 +228,10 @@ class PlayingState extends React.Component {
                 y0: this.state.fieldSelected.y,
                 x: col,
                 y: row,
-                player_color: this.state.playerColor // TODO, how can I know this shit????
+                player_color: this.state.playerColor
             };
             console.log(move);
-            socket.emit('made_move', room_id, move);
+            socket.emit('made_move', this.state.room_id, move);
         }
         else {
             if (!this.state.field[row][col].is_empty) {
@@ -257,32 +240,22 @@ class PlayingState extends React.Component {
                 });
             }
         }
-        // socket.emit('made_move', );
     }
     render () {
-        // console.log(this.state);
         return (
         <div className="app-container">
             <div className="app">
                 <div className="player-container player1">
                     <PlayerInfo info={this.state.player1}/>
-                    {/* <PlayerInfo
-                        player={this.state.player2}
-                        field={this.state.game.field}
-                        history={this.state.game.history || []} /> */}
                 </div>
                 <div className="game-container">
-                    <span>{this.state.order ? 'white' : 'black'}</span>
+                    <span>player color: {this.state.playerColor ? 'white' : 'black'}</span>
+                    <span>order color: {this.state.order ? 'white' : 'black'}</span>
                     <CheckersGame field={this.state.field} 
                             handleCheckersClick={this.handleCheckersClick.bind(this)} />
                 </div>
                 <div className="player-container player2">
                     <PlayerInfo info={this.state.player2}/>
-                    {/* <PlayerInfo
-                        player={this.state.player1}
-                        field={this.state.game.field}
-                        history={this.state.game.history || []} 
-                        reverse={true} /> */}
                 </div>
             </div>
         </div>
@@ -290,48 +263,27 @@ class PlayingState extends React.Component {
     }
 }
 
-class BrokenGameState extends React.Component {
+class WaitingState extends React.Component {
     constructor (props) { super(props); }
-    render() {
-        return (<div>Broken</div>);
-    }
-}
-
-class EndGameState extends React.Component  {
-    constructor (props) { super(props); }
-    render() {
-        return (<div>Game ended</div>);
-    }
-}
-
-class PlayerAcceptanceBtn extends React.Component {
-    constructor (props) {
-        super(props);
-        this.handleClick = props.handleClick;
-    }
-    render () {
-        return (
-            <button onclick={this.props.handleClick}></button>
-        );
-    }
-}
-
-class AcceptanceWaitingState extends React.Component {
-    constructor (props) { super(props); }
+    // componentDidMount() {
+    //     socket.on('ready_to_start', (...args) => {
+            
+    //     });
+    // }
     handleAccept (player) {
         // player == true - белый игрок, false - черный
-        // io.emit('set_player')
+        socket.emit('join_game', this.props.room_id);
     }
     render () {
         return (
             <div className="form-wrapper">
-
-                {/* <form action="leave"><input type="submit" value="Выйти из игры"/></form> */}
-                {/* <form action="agree"><input type="submit" value="Принять игру"/></form> */}
+                <button onClick={this.handleAccept.bind(this)}>Зайти за черных</button>
+                <button onClick={this.handleAccept.bind(this)}>Зайти за белых</button>
+                {/* <form action="join"><input type="submit" value="Зайти за черных"/></form> */}
+                {/* <form action="join"><input type="submit" value="Зайти за белых"/></form> */}
             </div>
         )
     }
-
 }
 
 ReactDOM.render(<App/>, document.querySelector('.__react-root'));
