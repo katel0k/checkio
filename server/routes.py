@@ -10,45 +10,45 @@ from game_logic import Game, GameMove
 from setup_db import conn, cur
 import sys
 
-@server.route('/')
-@server.route('/index')
+@server.route('/', methods=['GET', 'POST'])
 def index_route():
-    return render_template('index.html', title="Main page")
+    login_form = LoginForm()
+    reg_form = RegisterForm()
+    return render_template('index.html', title="Main page", login_form=login_form, reg_form=reg_form)
 
-@server.route('/login', methods=['GET', 'POST'])
+@server.route('/login', methods=['POST'])
 def login_route():
     if current_user.is_authenticated:
         return redirect('/')
-    form = LoginForm()
-    if form.validate_on_submit():
+    login_form = LoginForm()
+    if login_form.login_submit.data and login_form.validate():
         try:
-            user = User.login_user(form.email.data, form.password.data)
+            user = User.login_user(login_form.login_email.data, login_form.login_password.data)
         except LoginError:
-            return redirect('/login') # TODO: pass an error here
+            return redirect('/') # TODO: pass an error here
         
-        login_user(user, remember=form.rem.data)
+        login_user(user, remember=login_form.login_rem.data)
         return redirect('/')
-    return render_template('login.html', form=form, title='Login')
+    return redirect('/')
 
 @server.route('/logout')
 def logout_route ():
 	logout_user()
 	return redirect('/')
 
-@server.route('/register', methods=['GET', 'POST'])
+@server.route('/register', methods=['POST'])
 def register_route():
     if current_user.is_authenticated:
         return redirect('/')
-    form = RegisterForm()
-    if form.validate_on_submit():
+    reg_form = RegisterForm()
+    if reg_form.reg_submit.data and reg_form.validate():
         try:
-            user = User.register_new_user(form.email.data, form.password.data, form.nickname.data)
+            user = User.register_new_user(reg_form.reg_email.data, reg_form.reg_password.data, reg_form.reg_nickname.data)
             login_user(user, remember=True) # TODO: no rem field exists yet
             return redirect('/')
         except RegisterError:
-            return redirect('/register') # TODO: pass error message here
-    return render_template('register.html', form=form, title='Registration')
-
+            return redirect('/') # TODO: pass error message here
+    return redirect('/')
 
 @server.route('/room', methods=['GET', 'POST'])
 def room_route():
