@@ -28,25 +28,6 @@ class RoomMenu extends React.Component {
                     playersAmount: newPlayersAmount
                 }
             });
-            // if (!(id in this.state.roomList)) {
-            //     this.setState({
-            //         roomList: {...this.state.roomList, 
-            //             [id]: {
-            //                 state: newState,
-            //                 playersAmount: newPlayersAmount
-            //             }
-            //         }
-            //     });
-            // }
-            // else {
-            //     this.setState({
-            //         ...this.state.roomList,
-            //         [id]: {
-            //             state: newState,
-            //             playersAmount: newPlayersAmount
-            //         }
-            //     });
-            // }
         });
     }
 

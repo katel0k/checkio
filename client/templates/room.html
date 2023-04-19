@@ -6,11 +6,12 @@
 {% endblock %}
 
 {% block react %}
-	<div id="game" class="__react-root"></div>
+	<div class="__react-root game"></div>
 	<!-- <script type="text/javascript">
 		const room_state={{ room_state|safe }};
 		const 
 		const room_id={{ room_id|safe }};
 	</script> -->
-	<script type="text/javascript" src="/client/dist/room.js"></script>
+	<!-- <script type="text/javascript" src="/client/dist/room.js"></script> -->
+	<script src="/client/dist/main.js"></script>
 {% endblock %}
