@@ -192,7 +192,7 @@ class PlayingState extends React.Component {
             });
         });
         socket.on('made_move', (json) => {
-            let {field, move, order, ...rest} = JSON.parse(json);
+            let {field, move, ...rest} = JSON.parse(json);
             console.log(field, move, this);
             if (!move.is_possible) {
                 // display error message
@@ -203,7 +203,7 @@ class PlayingState extends React.Component {
             }
             this.setState({
                 field: field,
-                order: order,
+                order: move.changes_order ^ move.is_white_player,
                 fieldSelected: false
             });
         });
@@ -249,7 +249,8 @@ class PlayingState extends React.Component {
                     <PlayerInfo info={this.state.player1}/>
                 </div>
                 <div className="game-container">
-                    <span>{this.state.order ? 'white' : 'black'}</span>
+                    <span>player color: {this.state.playerColor ? 'white' : 'black'}</span>
+                    <span>order color: {this.state.order ? 'white' : 'black'}</span>
                     <CheckersGame field={this.state.field} 
                             handleCheckersClick={this.handleCheckersClick.bind(this)} />
                 </div>
