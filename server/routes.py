@@ -54,7 +54,15 @@ def register_route():
 def room_route():
     if request.method == 'GET':
         return json.dumps({
-            "room_list": list(app.get_room_list().keys())
+            "room_list": list(map(
+                lambda room_id:
+                    {
+                        "id": room_id,
+                        "state": app.room_list[room_id]._state,
+                        "players_amount": len(app.room_list[room_id]._viewers)
+                    },
+                app.room_list
+            ))
             })
     elif request.method == 'POST':
         room = Room.make_new_room()
