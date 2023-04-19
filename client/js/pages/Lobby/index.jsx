@@ -1,11 +1,14 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 
+import { io } from 'socket.io-client';
+const socket = io();
+
 class RoomMenu extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            roomList: []
+            roomList: {}
         };
     }
 
@@ -13,12 +16,37 @@ class RoomMenu extends React.Component {
         fetch(new URL('room', location.href)).then(response => response.json())
         .then(obj => {
             this.setState({
-                roomList: obj.room_list.map(
-                    a => ({
-                        id: a.id, state: a.state, playersAmount: a.players_amount
-                    })
-                )
+                roomList: obj.room_list
             });
+        });
+
+        socket.on('room_list_updated', (id, newState, newPlayersAmount) => {
+            this.setState({
+                ...this.state.roomList,
+                [id]: {
+                    state: newState,
+                    playersAmount: newPlayersAmount
+                }
+            });
+            // if (!(id in this.state.roomList)) {
+            //     this.setState({
+            //         roomList: {...this.state.roomList, 
+            //             [id]: {
+            //                 state: newState,
+            //                 playersAmount: newPlayersAmount
+            //             }
+            //         }
+            //     });
+            // }
+            // else {
+            //     this.setState({
+            //         ...this.state.roomList,
+            //         [id]: {
+            //             state: newState,
+            //             playersAmount: newPlayersAmount
+            //         }
+            //     });
+            // }
         });
     }
 
@@ -26,13 +54,13 @@ class RoomMenu extends React.Component {
         return (
             <div className="room-menu">
                 {
-                    this.state.roomList.map(
-                        (room, i) => 
-                            <div className="room-menu__entry" key={i}>
-                                <span>{room.id}</span>
+                    Object.entries(this.state.roomList).map(
+                        ([room_id, room]) =>
+                            <div className="room-menu__entry" key={room_id}>
+                                <span>{room_id}</span>
                                 <span>{room.state}</span>
                                 <span>{room.playersAmount}</span>
-                                <Link to={"/room/" + room.id}>Подключиться</Link>
+                                <a href={"/room/" + room_id} className="connect-btn">Подключиться</a>
                             </div>
                     )
                 }
