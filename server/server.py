@@ -4,7 +4,6 @@ from flask_login import LoginManager
 from random import randrange
 from flask_socketio import SocketIO
 import game_logic
-
 # # obviously bad code
 # ids_set = set()
 # def get_unique_id():
@@ -34,6 +33,8 @@ socketio = SocketIO(server, ping_timeout=10000, logger=False)
 class Application(object):
     def __init__(self):
         self.room_list = {}
+    # def request_room_list(self):
+
     def get_room_list(self):
         return self.room_list
         
@@ -42,3 +43,5 @@ app = Application()
 # game_engine = game_logic.GameEngine()
 
 import models, routes
+
+app.room_list = models.Room.get_from_database()

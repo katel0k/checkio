@@ -265,11 +265,25 @@ PLAYING = 'playing'
 DEAD = 'dead'
 
 class Room:
-    def __init__(self, id):
+    def __init__(self, id, **kwargs):
         self.id = id
-        self._state = WAITING
-        self._viewers = {}
+        self._state = kwargs.get('state', WAITING)
+        self._viewers = kwargs.get('viewers', {})
         self._game_setter = None
+
+    @staticmethod
+    def get_from_database():
+        cur.execute('''
+            SELECT id, state, user_id
+            FROM rooms JOIN viewers ON (rooms.id = viewers.room_id)
+            WHERE state <> 'DEAD' AND left_dttm IS NULL
+        ''')
+        room_list = {}
+        for (id, state, user_id) in cur.fetchall():
+            if id not in room_list:
+                room_list[id] = Room(id, state=state, viewers=dict())
+            room_list[id]._viewers[user_id] = Viewer(user_id, id)
+        return room_list
 
     @property
     def state(self):
