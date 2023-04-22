@@ -73,7 +73,7 @@ w0w0w0w0'''
         self.FIELD_SIZE = kwargs.get('FIELD_SIZE', 8)
 
         self.outcome = None # исход партии. По умолчанию это False, то есть его еще нет
-
+        self.history = []
         self._prev = None # последняя шашка, сделавшая съедающий ход.
 
     def _generate_diagonal(self, r, c, is_main=True):
@@ -223,6 +223,8 @@ w0w0w0w0'''
 
         if len(self._get_all_noneating_moves()) == 0 and len(self._get_all_fights()) == 0:
             self.outcome = 'white' if not self.is_white_move else 'black'
+        
+        self.history.append(move)
 
     def handle_move(self, move):
         '''Возвращает False если ход невозможен, иначе выполняет ход'''
