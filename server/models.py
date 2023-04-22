@@ -7,6 +7,7 @@ from server import login_manager
 from psycopg2 import sql
 import game_logic
 import sys
+import json
 
 class LoginError(Exception):
     '''Такая ошибка происходит при неудачной попытке входа в аккаунт'''
@@ -147,8 +148,8 @@ class User(UserMixin):
         return self.__str__()
 
 class Viewer:
-    def __init__(self, user_id, room_id):
-        self.user_id = user_id
+    def __init__(self, user, room_id):
+        self.user = user
         self.room_id = room_id
 
     @staticmethod
@@ -158,39 +159,41 @@ class Viewer:
             (user_id, room_id) VALUES (%s, %s)''',
             (user.id, room.id))
         conn.commit()
-        return Viewer(user.id, room.id)
+        return Viewer(user, room.id)
     def leave_room(self):
         '''Дописывает в поле time_left время, когда он покинул комнату'''
         cur.execute('''UPDATE viewers 
                 time_left=NOW()::TIMESTAMP 
                 WHERE user_id=%s AND room_id=%s''', 
-                (self.user_id, self.room_id))
+                (self.user.id, self.room_id))
         conn.commit()
+    
+    def __str__(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+    
+    def __json__(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 
 
 class Player:
-    def __init__(self, user_id, game_id, is_white):
-        self.user_id = user_id
+    def __init__(self, user, game_id, is_white):
+        self.user = user
         self.game_id = game_id
         self.is_white = is_white
 
     @staticmethod
-    def make_new_player(user_id, game_id, is_white):
+    def make_new_player(user, game_id, is_white):
         cur.execute('''
             INSERT INTO user_games
             (user_id, game_id, is_white) VALUES
             (%s, %s, %s)
         ''', (
-            user_id, game_id, is_white
+            user.id, game_id, is_white
         ))
         conn.commit()
-        return Player(user_id, game_id, is_white)
-    
-# class GameMove:
-#     def __init__(self):
-#         pass
-#     def __repr__(self):
-#         return self.__str__()
+        return Player(user, game_id, is_white)
 
 class Game:
     def __init__(self, id, room_id):
@@ -224,11 +227,10 @@ class Game:
             INSERT INTO turns (game_id, index, user_id, body)
             VALUES (%s, %s, %s, %s)
         ''', (self.id, 0, 
-              self.white_player.user_id if move.is_white_player else self.black_player.user_id,
+              self.white_player.user.id if move.is_white_player else self.black_player.user.id,
               str(move)))
         conn.commit()
         return move
-        # GameMove(move.field_from, move.field_to, move.playerColor)
 
 
 class GameSetter:
@@ -306,7 +308,7 @@ class Room:
         if self.has_viewer(user):
             return # TODO: добавить сообщение об ошибке?
         viewer = Viewer.make_new_viewer(user, self)
-        self._viewers[viewer.user_id] = viewer
+        self._viewers[user.id] = viewer
         
     def remove_viewer(self, viewer):
         if not self.has_viewer(viewer):

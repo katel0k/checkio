@@ -9,6 +9,7 @@ import random
 from game_logic import Game, GameMove
 from setup_db import conn, cur
 import sys
+import copy
 
 @server.route('/', methods=['GET', 'POST'])
 def index_route():
@@ -93,10 +94,55 @@ def room_id_route(room_id):
 def room_id_info_route(room_id):
     if room_id not in app.room_list:
         return redirect('/')
-    return json.dumps({
-        'id': room_id,
-        'state': app.room_list[room_id]._state
-        })
+    room = app.room_list[room_id]
+    if room._game_setter is None:
+        return json.dumps({
+            'id': room_id,
+            'state': room._state,
+            'white_player': None,
+            'black_player': None,
+            'viewers': {
+                user_id: {
+                    'nickname': viewer.user.nickname
+                } for (user_id, viewer) in room._viewers.items()
+            },
+            'user': {
+                'id': current_user.id
+            }
+        }, default=lambda o: o.__dict__, 
+        sort_keys=True, indent=4)
+    elif room._game_setter.is_playing():
+        return json.dumps({
+            'id': room_id,
+            'state': room._state,
+            'white_player': room._game_setter.game.white_player.user,
+            'black_player': room._game_setter.game.black_player.user,
+            'viewers': {
+                user_id: {
+                    'nickname': viewer.user.nickname
+                } for (user_id, viewer) in room._viewers.items()
+            },
+            'user': {
+                'id': current_user.id
+            }
+        }, default=lambda o: o.__dict__, 
+        sort_keys=True, indent=4)
+    else:
+        return json.dumps({
+            'id': room_id,
+            'state': room._state,
+            'white_player': room._game_setter.creator,
+            'black_player': room._game_setter.opponent,
+            'viewers': {
+                user_id: {
+                    'nickname': viewer.user.nickname
+                } for (user_id, viewer) in room._viewers.items()
+            },
+            'user': {
+                'id': current_user.id
+            }
+        }, default=lambda o: o.__dict__, 
+        sort_keys=True, indent=4)
 
 @server.route('/room/<int:room_id>/leave')
 def room_id_leave_route(room_id):
@@ -129,9 +175,8 @@ def room_id_game_route(room_id):
     return json.dumps({
         'field': game_obj.game.field,
         'order': game_obj.game.is_white_move,
-        'white_player': game_obj.white_player.user_id,
-        'white_player': game_obj.black_player.user_id,
-        'player_color': current_user.get_id() == game_obj.white_player.user_id
+        'white_player': game_obj.white_player.user,
+        'black_player': game_obj.black_player.user
     }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
 
@@ -140,20 +185,47 @@ def room_id_game_route(room_id):
 def join_event_handler(room_id):
     # print(room_id, file=sys.stderr)
     room = app.room_list[room_id]
-    room.add_viewer(current_user)
+    room.add_viewer(copy.copy(current_user))
     join_room(room)
-        
+    emit('player_joined', {
+        user_id: {
+            'nickname': viewer.user.nickname
+        } for (user_id, viewer) in room._viewers.items()
+    }, to=room)
 
 
 
 @socketio.on('join_game')
 def join_game_event_handler(room_id):
     room = app.room_list[room_id]
-    room.set_player(current_user.get_id())
+    room.set_player(copy.copy(current_user))
+    socketio.emit('player_set', {
+        'id': current_user.id,
+        'nickname': current_user.nickname,
+        'rating': current_user.rating
+    }, to=room)
+    # TODO: make an error when same player tries to connect
     if room.is_ready_to_start():
         room.start_game()
+        game = room._game_setter.game
         # room._game_setter.game
-        socketio.emit('ready_to_start', to=room)
+        socketio.emit('ready_to_start',
+                      {
+            'white_player': {
+                'id': game.white_player.user.id,
+                'nickname': game.white_player.user.nickname,
+                'rating': game.white_player.user.rating
+            },
+            'black_player': {
+                'id': game.black_player.user.id,
+                'nickname': game.black_player.user.nickname,
+                'rating': game.black_player.user.rating
+            },
+            'game': {
+                'id': game.id
+            }
+                      },
+                       to=room)
 
 @socketio.on('made_move')
 def move_handler(room_id, move):

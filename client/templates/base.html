@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/client/css/bootstrap-reboot.min.css">
     <link rel="stylesheet" href="/client/css/bootstrap-grid.min.css">
     <title>Шашки</title>
+    {% block styles %} {% endblock %}
 </head>
 <body>
     <script src="https://kit.fontawesome.com/416de93d8d.js" crossorigin="anonymous"></script>
@@ -58,6 +59,7 @@
                 <div class="modal__subtitle">Зарегистрироваться</div>
                 <div class="modal__descr">Уже есть аккаунт? <span><a class="sign-up" href="#">Войти</a></span></div>
                 <form class="feed-form" action="{{url_for('register_route')}}" method="POST">
+                    {{ reg_form.hidden_tag() }} <!-- DO NOT REMOVE IT EVER AGAIN NOTHING WORKS OTHERWISE -->
                     {{ reg_form.reg_email(placeholder="Почта", class="email") }}
                     {{ reg_form.reg_nickname(placeholder="Никнейм", class="nickname") }}
                     {{ reg_form.reg_password(placeholder="Пароль", class="password") }}

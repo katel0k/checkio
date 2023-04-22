@@ -1,6 +1,8 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 
+import './Lobby.sass';
+
 import { io } from 'socket.io-client';
 const socket = io();
 
