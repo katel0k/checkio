@@ -4,10 +4,11 @@ from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
 import json
 from forms import LoginForm, RegisterForm
-from models import *
+from database_models import *
+# from models import *
 import random
-from game_logic import Game, GameMove
-from setup_db import conn, cur
+from game_logic import GameMove
+# from setup_db import conn, cur
 import sys
 import copy
 
@@ -65,7 +66,7 @@ def room_route():
             ))
             })
     elif request.method == 'POST':
-        room = Room.make_new_room()
+        room = RoomModel.make_new_room()
         app.room_list[room.id] = room
         return redirect(f'room/{room.id}/')
     else:

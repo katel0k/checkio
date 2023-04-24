@@ -41,7 +41,7 @@ class Application(object):
 app = Application()
 
 # game_engine = game_logic.GameEngine()
+import routes
+# import models, routes
 
-import models, routes
-
-app.room_list = models.Room.get_from_database()
+# app.room_list = models.Room.get_from_database()
