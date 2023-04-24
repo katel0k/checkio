@@ -1,9 +1,12 @@
 from flask_login import UserMixin
 # from setup_db import cur, conn
 from psycopg2 import sql
-from server import login_manager
+from server import app
 from werkzeug.security import generate_password_hash, check_password_hash
-from database_models import conn, cur
+# from database_models import conn, cur
+
+cur = app.db.cur
+conn = app.db.conn
 
 class LoginError(Exception):
     '''Такая ошибка происходит при неудачной попытке входа в аккаунт'''
@@ -101,7 +104,7 @@ class User(UserMixin):
         }
 
     @staticmethod
-    @login_manager.user_loader
+    @app.login_manager.user_loader
     def load_user(id):
         '''Загружает пользователя из базы данных по его айдишнику, 
             нужно для плагина flask_login'''

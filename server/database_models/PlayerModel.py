@@ -1,4 +1,7 @@
-from database_models import cur, conn
+# from database_models import cur, conn
+from server import app
+cur = app.db.cur
+conn = app.db.conn
 
 class PlayerModel:
     def __init__(self, user, game_id, is_white):

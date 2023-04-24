@@ -1,5 +1,8 @@
-from database_models import conn, cur
+# from database_models import conn, cur
 import json
+from server import app
+cur = app.db.cur
+conn = app.db.conn
 
 class ViewerModel:
     def __init__(self, user, room_id):

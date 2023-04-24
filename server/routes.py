@@ -1,16 +1,19 @@
-from server import app, server, login_manager, socketio
+from server import app #, server, login_manager, socketio
 from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
 import json
-from forms import LoginForm, RegisterForm
-from database_models import *
+from .forms import LoginForm, RegisterForm
+from .database_models import *
 # from models import *
 import random
-from game_logic import GameMove
+from .game_logic import GameMove
 # from setup_db import conn, cur
 import sys
 import copy
+
+server = app.server
+socketio = app.socketio
 
 @server.route('/', methods=['GET', 'POST'])
 def index_route():

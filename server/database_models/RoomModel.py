@@ -1,6 +1,12 @@
-from database_models import conn, cur, GameModel, ViewerModel
+# from database_models import conn, cur, GameModel, ViewerModel
 from psycopg2 import sql
-
+from server import app
+from .User import *
+from .PlayerModel import *
+from .GameModel import *
+from .ViewerModel import *
+cur = app.db.cur
+conn = app.db.conn
 
 class GameSetter:
     def __init__(self, room_id, user):
