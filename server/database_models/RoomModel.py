@@ -1,14 +1,18 @@
 # from database_models import conn, cur, GameModel, ViewerModel
 from psycopg2 import sql
-from server import app
+# from ..application import Application
+# app = Application()
 from .User import *
 from .PlayerModel import *
 from .GameModel import *
 from .ViewerModel import *
+from server import app
+
+
 cur = app.db.cur
 conn = app.db.conn
 
-class GameSetter:
+class GameManager:
     def __init__(self, room_id, user):
         # TODO: если расширять этот интерфейс для других игр, ему потребуется переработка
         # тогда можно будет сделать его более полным
@@ -21,7 +25,7 @@ class GameSetter:
     @staticmethod
     def create_game(user):
         # TODO: add game types
-        return GameSetter(user)
+        return GameManager(user)
     
     def join_user(self, user):
         self.opponent = user
@@ -35,6 +39,11 @@ class GameSetter:
     def start_game(self):
         self.game = GameModel.make_new_game(self.room_id, self.creator, self.opponent)
         
+
+class ViewersManager:
+    pass
+
+
 
 # class RoomState(Enum):
 WAITING = 'waiting'
@@ -107,7 +116,7 @@ class RoomModel:
     
     def set_player(self, user):
         if self._game_setter is None:
-            self._game_setter = GameSetter(self.id, user)
+            self._game_setter = GameManager(self.id, user)
         else:
             self._game_setter.join_user(user)
     
@@ -116,3 +125,5 @@ class RoomModel:
     
     def start_game(self):
         self._game_setter.start_game()
+
+__all__ = ['RoomModel']

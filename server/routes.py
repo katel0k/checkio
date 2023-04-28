@@ -1,10 +1,14 @@
-from server import app #, server, login_manager, socketio
+from .database_models import *
+from .database_models import User
+from server import app
+# from .application import Application
+# app = Application()
 from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user, login_user, logout_user
 import json
 from .forms import LoginForm, RegisterForm
-from .database_models import *
+
 # from models import *
 import random
 from .game_logic import GameMove
@@ -12,7 +16,7 @@ from .game_logic import GameMove
 import sys
 import copy
 
-server = app.server
+server = app
 socketio = app.socketio
 
 @server.route('/', methods=['GET', 'POST'])

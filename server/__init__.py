@@ -1,7 +1,10 @@
-from .application import Application
-
-app = Application()
-app.run()
+# from .application import Application
+from .application import create_app
+app = create_app()
+# app = Application()
+# import sys
+# print(app, file=sys.stderr)
+# app.run()
 
 # from flask import appcontext_tearing_down
 # appcontext_tearing_down.connect(app.db.close, app.server)

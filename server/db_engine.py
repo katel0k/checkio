@@ -10,8 +10,10 @@ class DB:
         self.cur = self.conn.cursor()
         # print(self.conn, self.cur, file=sys.stderr)
     
-    def close(self, sender, **extra):
+    def close(self, *args, **kwargs):
         # print('close', file=sys.stderr)
         # print(sender, extra, file=sys.stderr)
         self.cur.close()
         self.conn.close()
+    def __del__(self):
+        self.close()

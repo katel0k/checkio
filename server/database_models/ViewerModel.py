@@ -1,5 +1,7 @@
 # from database_models import conn, cur
 import json
+# from ..application import Application
+# app = Application()
 from server import app
 cur = app.db.cur
 conn = app.db.conn

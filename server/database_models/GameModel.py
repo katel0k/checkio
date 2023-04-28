@@ -2,8 +2,9 @@
 from ..game_logic import *
 # from database_models import cur, conn, PlayerModel
 import sys
+# from ..application import Application
+# app = Application()
 from server import app
-
 from .PlayerModel import *
 cur = app.db.cur
 conn = app.db.conn
@@ -28,7 +29,7 @@ class GameModel:
             SELECT max(id) FROM games WHERE room_id=%s
         ''', (room_id,))
         res = cur.fetchone()
-        game = Game(res[0], room_id)
+        game = GameModel(res[0], room_id)
         game.white_player = PlayerModel.make_new_player(white_user, game.id, True)
         game.black_player = PlayerModel.make_new_player(black_user, game.id, False)
         return game

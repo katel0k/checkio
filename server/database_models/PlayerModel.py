@@ -1,4 +1,6 @@
 # from database_models import cur, conn
+# from ..application import Application
+# app = Application()
 from server import app
 cur = app.db.cur
 conn = app.db.conn
