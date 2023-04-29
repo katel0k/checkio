@@ -67,7 +67,7 @@ def room_route():
                 lambda room_id:
                     (room_id, {
                         "state": app.room_list[room_id]._state,
-                        "playersAmount": len(app.room_list[room_id]._viewers)
+                        "playersAmount": len(app.room_list[room_id].viewers)
                     }),
                 app.room_list
             ))
@@ -112,7 +112,7 @@ def room_id_info_route(room_id):
             'viewers': {
                 user_id: {
                     'nickname': viewer.user.nickname
-                } for (user_id, viewer) in room._viewers.items()
+                } for (user_id, viewer) in room.viewers.items()
             },
             'user': {
                 'id': current_user.id
@@ -128,7 +128,7 @@ def room_id_info_route(room_id):
             'viewers': {
                 user_id: {
                     'nickname': viewer.user.nickname
-                } for (user_id, viewer) in room._viewers.items()
+                } for (user_id, viewer) in room.viewers.items()
             },
             'user': {
                 'id': current_user.id
@@ -144,7 +144,7 @@ def room_id_info_route(room_id):
             'viewers': {
                 user_id: {
                     'nickname': viewer.user.nickname
-                } for (user_id, viewer) in room._viewers.items()
+                } for (user_id, viewer) in room.viewers.items()
             },
             'user': {
                 'id': current_user.id
@@ -193,12 +193,12 @@ def room_id_game_route(room_id):
 def join_event_handler(room_id):
     # print(room_id, file=sys.stderr)
     room = app.room_list[room_id]
-    room.add_viewer(copy.copy(current_user))
+    room.connect_user(copy.copy(current_user))
     join_room(room)
     emit('player_joined', {
         user_id: {
             'nickname': viewer.user.nickname
-        } for (user_id, viewer) in room._viewers.items()
+        } for (user_id, viewer) in room.viewers.items()
     }, to=room)
 
 

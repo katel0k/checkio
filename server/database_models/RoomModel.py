@@ -40,8 +40,30 @@ class GameManager:
         self.game = GameModel.make_new_game(self.room_id, self.creator, self.opponent)
         
 
-class ViewersManager:
-    pass
+class ViewerManager:
+    '''Вспомогательный класс для класса RoomModel. Менеджит всех людей в комнате(наблюдателей)
+    Эти люди точно будут получать уведомления, о том, что происходит в комнате и о них должны быть записи в БД'''
+    def __init__(self, room, **kwargs):
+        '''Конструктор может получить на вход viewers - словарь пользователей, если комната подгружается из БД'''
+        self._viewers = kwargs.get('viewers', dict())
+        self.room = room
+
+    def has_user(self, user):
+        return user.id in self.viewers
+    
+    def connect_user(self, user):
+        if self.has_user(user): return
+        self.viewers[user.id] = ViewerModel.make_new_viewer(user, self.room)
+        
+    def disconnect_user(self, user):
+        if not user.id in self.viewers: return
+        viewer = self.viewers[user.id]
+        viewer.leave_room()
+        self.viewers.pop(user.id)
+    
+    @property
+    def viewers(self):
+        return self._viewers
 
 
 
@@ -50,11 +72,25 @@ WAITING = 'waiting'
 PLAYING = 'playing'
 DEAD = 'dead'
 
+
+# что этот класс должен уметь:
+
+# менеджмент пользоваетелй:
+#     - подключаются viewers
+        # connect_user(user)
+#     - отключаются viewers
+        # disconnect_user(user)
+# менеджмент игры:
+# 
+# менеджмент базы данных
+
+
 class RoomModel:
     def __init__(self, id, **kwargs):
         self.id = id
         self._state = kwargs.get('state', WAITING)
-        self._viewers = kwargs.get('viewers', {})
+        # self._viewers = kwargs.get('viewers', {})
+        self._viewer_manager = ViewerManager(self)
         self._game_setter = None
 
     @staticmethod
@@ -99,20 +135,13 @@ class RoomModel:
         return RoomModel(id=res[0])
     
     
-    def has_viewer(self, user):
-        return user.id in self._viewers
-    
-    def add_viewer(self, user):
-        if self.has_viewer(user):
-            return # TODO: добавить сообщение об ошибке?
-        viewer = ViewerModel.make_new_viewer(user, self)
-        self._viewers[user.id] = viewer
-        
-    def remove_viewer(self, viewer):
-        if not self.has_viewer(viewer):
-            return # TODO: добавить сообщение об ошибке?
-        viewer.leave_room()
-        self._viewers.pop(viewer.id)
+    def connect_user(self, user):
+        self._viewer_manager.connect_user(user)
+    def disconnect_user(self, user):
+        self._viewer_manager.disconnect_user(user)
+    @property
+    def viewers(self):
+        return self._viewer_manager.viewers
     
     def set_player(self, user):
         if self._game_setter is None:
