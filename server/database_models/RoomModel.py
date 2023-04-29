@@ -8,11 +8,107 @@ from .GameModel import *
 from .ViewerModel import *
 from server import app
 
-
 cur = app.db.cur
 conn = app.db.conn
 
+GAME_MANAGER_SETUP_STATE = 'setup'
+GAME_MANAGER_PLAYING_STATE = 'playing'
+
+class GameManagerSetupState:
+    def __init__(self, game_manager):
+        self._game_manager = game_manager
+
+    def set_player(self, user):
+        gm = self._game_manager
+        if gm.white_player is None:
+            gm.white_player = user
+        elif gm.black_player is None:
+            gm.black_player = user
+
+    def unset_player(self, user):
+        gm = self._game_manager
+        if gm.white_player == user:
+            (gm.white_player, gm.black_player) = (gm.black_player, None)
+        elif gm.black_player == user:
+            gm.black_player = None
+
+    def change_setting(self, **settings):
+        '''Возможные настройки: пока никаких:)'''
+        pass
+
+    def is_game_ready(self):
+        gm = self._game_manager
+        return gm.white_player is not None and gm.black_player is not None
+
+class GameManagerPlayingState:
+    def __init__(self, game_manager):
+        self._game_manager = game_manager
+
+        gm = self._game_manager
+        self._game = GameModel.make_new_game(gm._room.id, gm.white_player, gm.black_player)
+
+    def unset_player(self, user):
+        pass
+
+    def handle_move(self, move):
+        pass
+
+    def get_outcome(self):
+        pass    
+
 class GameManager:
+    '''Вспомогательный класс для класса RoomModel. Менеджит игру в комнату
+    Умеет настраивать игру (устанавливать обоих игроков, менять ее настройки, удалять игроков во время настройки)
+    Умеет определять, готова ли игра для начала
+    Умеет проводить игру (начинать ее, делать ходы в игре, сообщать о победе/поражении)'''
+    def __init__(self, room, **kwargs):
+        self._room = room
+        self._state = (GameManagerSetupState(self) 
+                       if kwargs.get('state', GAME_MANAGER_SETUP_STATE) == GAME_MANAGER_SETUP_STATE
+                        else GameManagerPlayingState(self))
+        # состояния взаимодействуют с этими полями
+        self._white_player = None
+        self._black_player = None
+    
+    # это существует для того чтобы извне код не сломался
+    @property
+    def white_player(self):
+        return self._white_player
+    @white_player.setter
+    def white_player(self, value):
+        self._white_player = value
+    @property
+    def black_player(self):
+        return self._black_player
+    @black_player.setter
+    def black_player(self, value):
+        self._black_player = value
+    
+# TODO: понадобится переименовать по-человечески
+    def set_player(self, user):
+        '''Устанавливает user как одного из игроков'''
+        self._state.set_player(user)
+
+    def unset_player(self, user):
+        self._state.unset_player(user)
+
+    def change_setting(self, **settings):
+        '''Возможные настройки: пока никаких:)'''
+        self._state.change_setting(**settings)
+
+# TODO: анаолгично, возможно, это бред
+    def is_game_ready(self):
+        return self._state.is_game_ready()
+# TODO: возможно, это бред
+    def start_game(self):
+        if not self.is_game_ready(): return
+        self._state = GameManagerPlayingState(self)
+
+class GameSetter:
+    def __init__(self, room):
+        self._room = room
+        
+
     def __init__(self, room_id, user):
         # TODO: если расширять этот интерфейс для других игр, ему потребуется переработка
         # тогда можно будет сделать его более полным
@@ -38,22 +134,23 @@ class GameManager:
 
     def start_game(self):
         self.game = GameModel.make_new_game(self.room_id, self.creator, self.opponent)
-        
 
+
+# TODO: подумать, добавить ли сюда обработку активного игрока, а то сейчас это делается в рутах
 class ViewerManager:
     '''Вспомогательный класс для класса RoomModel. Менеджит всех людей в комнате(наблюдателей)
     Эти люди точно будут получать уведомления, о том, что происходит в комнате и о них должны быть записи в БД'''
     def __init__(self, room, **kwargs):
         '''Конструктор может получить на вход viewers - словарь пользователей, если комната подгружается из БД'''
         self._viewers = kwargs.get('viewers', dict())
-        self.room = room
+        self._room = room
 
     def has_user(self, user):
         return user.id in self.viewers
     
     def connect_user(self, user):
         if self.has_user(user): return
-        self.viewers[user.id] = ViewerModel.make_new_viewer(user, self.room)
+        self.viewers[user.id] = ViewerModel.make_new_viewer(user, self._room)
         
     def disconnect_user(self, user):
         if not user.id in self.viewers: return
@@ -91,6 +188,7 @@ class RoomModel:
         self._state = kwargs.get('state', WAITING)
         # self._viewers = kwargs.get('viewers', {})
         self._viewer_manager = ViewerManager(self)
+        self._game_manager = GameManager(self)
         self._game_setter = None
 
     @staticmethod
@@ -145,7 +243,7 @@ class RoomModel:
     
     def set_player(self, user):
         if self._game_setter is None:
-            self._game_setter = GameManager(self.id, user)
+            self._game_setter = GameSetter(self.id, user)
         else:
             self._game_setter.join_user(user)
     
