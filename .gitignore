@@ -1,0 +1,7 @@
+node_modules/
+package-lock.json
+server/virt
+__pycache__/
+dist/
+server/database
+client/arina-git
