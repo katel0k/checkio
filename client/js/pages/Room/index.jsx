@@ -11,7 +11,6 @@ function User(props) {
                 <div className="game__user__info">
                     <div className="game__user__info_name">{props.userInfo.nickname}</div>
                     <div className="game__user__info_rate">
-                        {/*  style="color: #000000;" */}
                         <div><i className="fa-solid fa-signal"></i></div> 
                         <div className="rate">{props.userInfo.rating}</div>
                     </div>
@@ -71,16 +70,6 @@ function GamePlay(props) {
                 </li>
             </ul>
             <UserList userList={props.userList}/>
-            {/* <div className="game__play__content game__play__content_active">
-                <div className="game__play__item">
-                    <p>История ходов</p>
-                </div>
-            </div>
-            <div className="game__play__content">
-                <div className="game__play__item">
-                    <p>Сообщения игроков</p>
-                </div>
-            </div> */}
         </div>
     );
 }
@@ -106,7 +95,6 @@ function GameSetter(props) {
 
 
 const waiting_state = 'waiting';
-const accept_state = 'accept';
 const playing_state = 'playing';
 
 export default class Room extends React.Component {
@@ -118,7 +106,10 @@ export default class Room extends React.Component {
             messages: {},
             whitePlayer: undefined,
             blackPlayer: undefined,
-            self: undefined,
+            self: {
+                id: undefined,
+                color: undefined
+            },
             game: undefined
         };
     }
@@ -170,13 +161,23 @@ export default class Room extends React.Component {
         fetch(new URL('info', location.href))
             .then(response => response.json())
             .then(obj => {
+                let color;
+                if (obj.state == playing_state) {
+                    if (obj.user.id == obj.white_player.id)
+                        color = 'white'
+                    else if (obj.user.id == obj.black_player.id)
+                        color = 'black';
+                }
                 this.setState({
                     roomId: obj.id,
                     state: obj.state,
                     whitePlayer: obj.white_player,
                     blackPlayer: obj.black_player,
                     viewers: obj.viewers,
-                    self: obj.user
+                    self: {
+                        id: obj.user.id,
+                        color
+                    }
                 });
                 return obj;
             })

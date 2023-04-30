@@ -6,10 +6,9 @@ function CheckerImg ({is_ghost, is_white, is_queen}) {
 		alt={is_white ? 'wh' : 'bl'}/>
 }
 
-function CheckersCell ({checker, bg, pos}) {
+function CheckersCell ({checker, bg, pos, selected}) {
     return (
-        
-        <div className={`checkers-cell checkers-cell-${bg}`}
+        <div className={`checkers-cell checkers-cell-${bg} ${selected ? 'checkers-cell-selected' : ''}`}
                 pos={pos}>
             {checker.is_empty ? undefined : <CheckerImg 
                     is_white={checker.is_white}
@@ -23,20 +22,20 @@ function CheckersCell ({checker, bg, pos}) {
 function CheckersField(props) {
     return (
         <div className="checkers-field" onClick={props.onClick}>
-            {props.field.reduce((arr, el, i) => 
-                arr.concat(el.map((value, j) => 
+            {props.field.reduce((arr, el, y) => 
+                arr.concat(el.map((value, x) => 
                     <CheckersCell
-                        key={i + '_' + j}
-                        pos={i + '_' + j}
+                        key={y + '_' + x}
+                        pos={y + '_' + x}
                         checker={value}
-                        bg={(i + j) % 2 == 0 ? 'white' : 'black'}
+                        bg={(y + x) % 2 == 0 ? 'white' : 'black'}
+                        selected={props.fieldSelected ? props.fieldSelected.x == x && props.fieldSelected.y == y : false}
                     />
                     )), [])}
         </div>
         );
 }
 
-// HOC for checkers
 function CheckersUI ({activePlayer, ...passThrough}) {
 	const ABC = 'abcdefgh';
 	let cl = activePlayer === 'black' ? ' reverse' : '';
@@ -83,29 +82,19 @@ export default class CheckerGame extends React.Component {
             let {game, move} = JSON.parse(json);
             this.setState({
                 field: game.field,
-                order: game.is_white_move
+                order: game.is_white_move,
+                fieldSelected: undefined
             });
-            // console.log(field, move, this);
-            // if (!move.is_possible) {
-            //     // display error message
-            //     this.setState({
-            //         fieldSelected: false
-            //     });
-            //     return;
-            // }
-            // console.log(field);
-            // this.setState({
-            //     field: field,
-            //     order: move.changes_order ^ move.is_white_player,
-            //     fieldSelected: false
-            // });
         });
     }
 
     handleCheckersClick(e) {
-        // console.log(this.state);
         let [row, col] = [...e.target.closest('.checkers-cell')
 						.getAttribute('pos').split('_').map(Number)];
+
+        let is_white_player = this.props.playerColor == undefined ?
+            undefined : this.props.playerColor == 'white';
+
         if (this.state.fieldSelected) {
             if (this.state.field[this.state.fieldSelected.y][this.state.fieldSelected.x].is_empty) {
                 this.setState({
@@ -121,9 +110,8 @@ export default class CheckerGame extends React.Component {
                 y0: this.state.fieldSelected.y,
                 x: col,
                 y: row,
-                player_color: this.props.playerColor == 'white'
+                player_color: is_white_player
             };
-            // console.log(move);
             this.props.socket.emit('made_move', this.props.roomId, move);
         }
         else {
@@ -145,7 +133,8 @@ export default class CheckerGame extends React.Component {
                 <div className="checkers-UI-container">
                     <CheckersUI
                         onClick={this.handleCheckersClick.bind(this)}
-                        field={this.state.field} />
+                        field={this.state.field}
+                        fieldSelected={this.state.fieldSelected} />
                 </div>
             </div>
         )

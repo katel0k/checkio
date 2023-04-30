@@ -65,7 +65,6 @@ def room_id_leave_route(room_id):
 def room_id_game_route(room_id):
     if room_id not in app.room_list:
         return make_response('Incorrect room id, no such room exists', 400)
-    # game_obj = app.room_list[room_id]._game_setter.game
     room = app.room_list[room_id]
     return json.dumps({
             'white_player': room.white_player.__json__(),
@@ -73,13 +72,6 @@ def room_id_game_route(room_id):
             'game': room.get_game()
             }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
-# json.dumps({
-#         'field': game_obj.game.field,
-#         'order': game_obj.game.is_white_move,
-#         'white_player': game_obj.white_player.user,
-#         'black_player': game_obj.black_player.user
-#     }, default=lambda o: o.__dict__, 
-#             sort_keys=True, indent=4)
 
 
 @socketio.on('join')
@@ -150,11 +142,10 @@ def join_game_event_handler(room_id):
 @socketio.on('made_move')
 def move_handler(room_id, move):
     room = app.room_list[room_id]
-    # room._game_setter.game.handle_move(move)
     move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
-    # game_engine.handle_move(room._game_setter.game.game, move)
-    # move = room._game_setter.game.handle_move(move)
-    move = room.handle_move(move)
+    # если клиент отправит ход от неправильного игрока, там будет None
+    if move.is_white_player is not None:
+        move = room.handle_move(move)
     emit('made_move', json.dumps({
         'game': room.get_game(),
         'move': move
