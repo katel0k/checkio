@@ -31,13 +31,13 @@ class GameModel:
         return game
 
     def handle_move(self, move):
-        print('made move', file=sys.stderr)
+        # print('made move', file=sys.stderr)
         res = self.game.handle_move(move)
         if not res: return move
         cur.execute('''
             INSERT INTO turns (game_id, index, user_id, body)
             VALUES (%s, %s, %s, %s)
-        ''', (self.id, 0, 
+        ''', (self.id, len(self.game.history), 
               self.white_player.user.id if move.is_white_player else self.black_player.user.id,
               str(move)))
         conn.commit()

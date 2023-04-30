@@ -47,21 +47,23 @@ class GameManagerPlayingState:
 
         gm = self._game_manager
         self._game_model = GameModel.make_new_game(gm._room.id, gm.white_player, gm.black_player)
-        self._game = Game()
+        # self._game = Game()
 
     def unset_player(self, user):
         pass
 
     def handle_move(self, move):
-        return self._game.handle_move(move)
+        return self._game_model.handle_move(move)
+        # return self._game.handle_move(move)
 
     def get_outcome(self):
         return self._game.outcome
     def get_game(self):
+        game = self._game_model.game
         return {
-            'field': self._game.field,
-            'is_white_move': self._game.is_white_move,
-            'outcome': self._game.outcome,
+            'field': game.field,
+            'is_white_move': game.is_white_move,
+            'outcome': game.outcome,
             'id': self._game_model.id
         }
 
@@ -118,6 +120,9 @@ class GameManager:
         return self._state.get_outcome()
     def get_game(self):
         return self._state.get_game()
+    def finish_game(self):
+        self._black_player = None
+        self._state = GameManagerSetupState()
 
 # class GameSetter:
 #     def __init__(self, room):
@@ -232,7 +237,7 @@ class RoomModel:
     @state.setter
     def state(self, value):
         self._state = value
-        self.__update_field('state', value)
+        self.__update_field('state', value.upper())
         # cur.execute() TODO: make here room_history insert
 
     def __update_field(self, field, value):
@@ -268,12 +273,16 @@ class RoomModel:
         return self._game_manager.is_ready_to_start()
     def start_game(self):
         self._game_manager.start_game()
+        self.state = PLAYING
     def handle_move(self, move):
         return self._game_manager.handle_move(move)
     def get_outcome(self):
         return self._game_manager.get_outcome()
     def get_game(self):
         return self._game_manager.get_game()
+    def finish_game(self):
+        self._game_manager.finish_game()
+        self.state = WAITING
     
     # # def set_player(self, user):
     #     # if self._game_setter is None:
