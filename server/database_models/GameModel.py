@@ -21,13 +21,9 @@ class GameModel:
     @staticmethod
     def make_new_game(room_id, white_user, black_user):
         cur.execute('''
-            INSERT INTO games (room_id) VALUES (%s)
+            INSERT INTO games (room_id) VALUES (%s) RETURNING id
         ''', (room_id,))
         conn.commit()
-        # TODO: TERRIBLE CODE
-        cur.execute('''
-            SELECT max(id) FROM games WHERE room_id=%s
-        ''', (room_id,))
         res = cur.fetchone()
         game = GameModel(res[0], room_id)
         game.white_player = PlayerModel.make_new_player(white_user, game.id, True)

@@ -20,6 +20,7 @@ class GameManagerSetupState:
 
     def set_player(self, user):
         gm = self._game_manager
+        if gm.white_player == user or gm.black_player == user: return
         if gm.white_player is None:
             gm.white_player = user
         elif gm.black_player is None:
@@ -186,7 +187,6 @@ class RoomModel:
     def __init__(self, id, **kwargs):
         self.id = id
         self._state = kwargs.get('state', WAITING)
-        # self._viewers = kwargs.get('viewers', {})
         self._viewer_manager = ViewerManager(self)
         self._game_manager = GameManager(self)
         self._game_setter = None
@@ -225,11 +225,9 @@ class RoomModel:
     @staticmethod
     def make_new_room():
         '''Создает новую пустую комнату'''
-        cur.execute('''INSERT INTO rooms DEFAULT VALUES''')
+        cur.execute('''INSERT INTO rooms DEFAULT VALUES RETURNING id''')
         conn.commit()
-        # TODO: TERRIBLE CODE
-        cur.execute('''SELECT max(id) FROM rooms''')
-        res = cur.fetchone() # TODO: проблемы с асинхронностью??
+        res = cur.fetchone() 
         return RoomModel(id=res[0])
     
     
