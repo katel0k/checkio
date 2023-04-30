@@ -141,3 +141,9 @@ class User(UserMixin):
         return 'id: %s, email: %s, nickname: %s' % (self.id, self.email, self.nickname)
     def __repr__(self):
         return self.__str__()
+    def __json__(self):
+        return {
+            'id': self.id,
+            'nickname': self.nickname,
+            'rating': self.rating
+        }

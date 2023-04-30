@@ -30,53 +30,14 @@ def room_id_info_route(room_id):
     if room_id not in app.room_list:
         return redirect('/')
     room = app.room_list[room_id]
-    if room._game_setter is None:
-        return json.dumps({
-            'id': room_id,
-            'state': room._state,
-            'white_player': None,
-            'black_player': None,
-            'viewers': {
-                user_id: {
-                    'nickname': viewer.user.nickname
-                } for (user_id, viewer) in room.viewers.items()
-            },
-            'user': {
-                'id': current_user.id
-            }
-        }, default=lambda o: o.__dict__, 
-        sort_keys=True, indent=4)
-    elif room._game_setter.is_playing():
-        return json.dumps({
-            'id': room_id,
-            'state': room._state,
-            'white_player': room._game_setter.game.white_player.user,
-            'black_player': room._game_setter.game.black_player.user,
-            'viewers': {
-                user_id: {
-                    'nickname': viewer.user.nickname
-                } for (user_id, viewer) in room.viewers.items()
-            },
-            'user': {
-                'id': current_user.id
-            }
-        }, default=lambda o: o.__dict__, 
-        sort_keys=True, indent=4)
-    else:
-        return json.dumps({
-            'id': room_id,
-            'state': room._state,
-            'white_player': room._game_setter.creator,
-            'black_player': room._game_setter.opponent,
-            'viewers': {
-                user_id: {
-                    'nickname': viewer.user.nickname
-                } for (user_id, viewer) in room.viewers.items()
-            },
-            'user': {
-                'id': current_user.id
-            }
-        }, default=lambda o: o.__dict__, 
+    return json.dumps({
+        'id': room_id,
+        'state': room._state,
+        'white_player': room.white_player.__json__() if room.white_player is not None else None,
+        'black_player': room.black_player.__json__() if room.black_player is not None else None,
+        'viewers': { user_id: viewer.user.__json__() for (user_id, viewer) in room.viewers.items() },
+        'user': current_user.__json__()
+    }, default=lambda o: o.__dict__, 
         sort_keys=True, indent=4)
 
 @server.route('/room/<int:room_id>/leave')
@@ -104,14 +65,21 @@ def room_id_leave_route(room_id):
 def room_id_game_route(room_id):
     if room_id not in app.room_list:
         return make_response('Incorrect room id, no such room exists', 400)
-    game_obj = app.room_list[room_id]._game_setter.game
+    # game_obj = app.room_list[room_id]._game_setter.game
+    room = app.room_list[room_id]
     return json.dumps({
-        'field': game_obj.game.field,
-        'order': game_obj.game.is_white_move,
-        'white_player': game_obj.white_player.user,
-        'black_player': game_obj.black_player.user
-    }, default=lambda o: o.__dict__, 
+            'white_player': room.white_player.__json__(),
+            'black_player': room.black_player.__json__(),
+            'game': room.get_game()
+            }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
+# json.dumps({
+#         'field': game_obj.game.field,
+#         'order': game_obj.game.is_white_move,
+#         'white_player': game_obj.white_player.user,
+#         'black_player': game_obj.black_player.user
+#     }, default=lambda o: o.__dict__, 
+#             sort_keys=True, indent=4)
 
 
 @socketio.on('join')
@@ -159,34 +127,25 @@ def join_event_handler(room_id):
 @socketio.on('join_game')
 def join_game_event_handler(room_id):
     room = app.room_list[room_id]
+    if room.is_player_set(current_user): return
+
     room.set_player(copy.copy(current_user))
     socketio.emit('player_set', {
         'id': current_user.id,
         'nickname': current_user.nickname,
         'rating': current_user.rating
     }, to=room)
-    # TODO: make an error when same player tries to connect
+    print(room.is_ready_to_start(), file=sys.stderr)
+    print(room.white_player, file=sys.stderr)
+    print(room.black_player, file=sys.stderr)
     if room.is_ready_to_start():
         room.start_game()
-        game = room._game_setter.game
-        # room._game_setter.game
-        socketio.emit('ready_to_start',
-                      {
-            'white_player': {
-                'id': game.white_player.user.id,
-                'nickname': game.white_player.user.nickname,
-                'rating': game.white_player.user.rating
-            },
-            'black_player': {
-                'id': game.black_player.user.id,
-                'nickname': game.black_player.user.nickname,
-                'rating': game.black_player.user.rating
-            },
-            'game': {
-                'id': game.id
-            }
-                      },
-                       to=room)
+        socketio.emit('game_started',
+            {
+            'white_player': room.white_player.__json__(),
+            'black_player': room.black_player.__json__(),
+            'game': { 'id': room.get_game()['id'] }
+            }, to=room)
 
 @socketio.on('made_move')
 def move_handler(room_id, move):
@@ -194,9 +153,11 @@ def move_handler(room_id, move):
     # room._game_setter.game.handle_move(move)
     move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
     # game_engine.handle_move(room._game_setter.game.game, move)
-    move = room._game_setter.game.handle_move(move)
+    # move = room._game_setter.game.handle_move(move)
+    move = room.handle_move(move)
     emit('made_move', json.dumps({
-        'field': room._game_setter.game.game.field, 'move': move
+        'game': room.get_game(),
+        'move': move
         }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4), to=room)
 

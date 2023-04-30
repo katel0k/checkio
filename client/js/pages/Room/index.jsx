@@ -139,7 +139,8 @@ export default class Room extends React.Component {
             });
         });
 
-        socket.on('ready_to_start', (obj) => {
+        socket.on('game_started', (obj) => {
+            console.log(obj);
             let color = undefined;
             if (this.state.self.id == obj.white_player.id)
                 color = 'white'

@@ -22,9 +22,9 @@ class GameManagerSetupState:
         gm = self._game_manager
         if gm.white_player == user or gm.black_player == user: return
         if gm.white_player is None:
-            gm.white_player = user
+            self._game_manager.white_player = user
         elif gm.black_player is None:
-            gm.black_player = user
+            self._game_manager.black_player = user
 
     def unset_player(self, user):
         gm = self._game_manager
@@ -37,7 +37,7 @@ class GameManagerSetupState:
         '''Возможные настройки: пока никаких:)'''
         pass
 
-    def is_game_ready(self):
+    def is_ready_to_start(self):
         gm = self._game_manager
         return gm.white_player is not None and gm.black_player is not None
 
@@ -46,16 +46,24 @@ class GameManagerPlayingState:
         self._game_manager = game_manager
 
         gm = self._game_manager
-        self._game = GameModel.make_new_game(gm._room.id, gm.white_player, gm.black_player)
+        self._game_model = GameModel.make_new_game(gm._room.id, gm.white_player, gm.black_player)
+        self._game = Game()
 
     def unset_player(self, user):
         pass
 
     def handle_move(self, move):
-        pass
+        return self._game.handle_move(move)
 
     def get_outcome(self):
-        pass    
+        return self._game.outcome
+    def get_game(self):
+        return {
+            'field': self._game.field,
+            'is_white_move': self._game.is_white_move,
+            'outcome': self._game.outcome,
+            'id': self._game_model.id
+        }
 
 class GameManager:
     '''Вспомогательный класс для класса RoomModel. Менеджит игру в комнату
@@ -85,7 +93,6 @@ class GameManager:
     def black_player(self, value):
         self._black_player = value
     
-# TODO: понадобится переименовать по-человечески
     def set_player(self, user):
         '''Устанавливает user как одного из игроков'''
         self._state.set_player(user)
@@ -97,44 +104,51 @@ class GameManager:
         '''Возможные настройки: пока никаких:)'''
         self._state.change_setting(**settings)
 
-# TODO: анаолгично, возможно, это бред
-    def is_game_ready(self):
-        return self._state.is_game_ready()
-# TODO: возможно, это бред
-    def start_game(self):
-        if not self.is_game_ready(): return
-        self._state = GameManagerPlayingState(self)
+    def is_player_set(self, user):
+        return self.white_player == user or self.black_player == user
 
-class GameSetter:
-    def __init__(self, room):
-        self._room = room
+    def is_ready_to_start(self):
+        return self._state.is_ready_to_start()
+    def start_game(self):
+        # if not self.is_ready_to_start(): return
+        self._state = GameManagerPlayingState(self)
+    def handle_move(self, move):
+        return self._state.handle_move(move)
+    def get_outcome(self):
+        return self._state.get_outcome()
+    def get_game(self):
+        return self._state.get_game()
+
+# class GameSetter:
+#     def __init__(self, room):
+#         self._room = room
         
 
-    def __init__(self, room_id, user):
-        # TODO: если расширять этот интерфейс для других игр, ему потребуется переработка
-        # тогда можно будет сделать его более полным
-        # также надо будет добавить сеттер/геттер для настроек игры
-        self.room_id = room_id
-        self.creator = user
-        self.opponent = None
-        self.game = None
+#     def __init__(self, room_id, user):
+#         # TODO: если расширять этот интерфейс для других игр, ему потребуется переработка
+#         # тогда можно будет сделать его более полным
+#         # также надо будет добавить сеттер/геттер для настроек игры
+#         self.room_id = room_id
+#         self.creator = user
+#         self.opponent = None
+#         self.game = None
 
-    @staticmethod
-    def create_game(user):
-        # TODO: add game types
-        return GameManager(user)
+#     @staticmethod
+#     def create_game(user):
+#         # TODO: add game types
+#         return GameManager(user)
     
-    def join_user(self, user):
-        self.opponent = user
+#     def join_user(self, user):
+#         self.opponent = user
 
-    def is_playing(self):
-        return self.game is not None
+#     def is_playing(self):
+#         return self.game is not None
     
-    def is_ready(self):
-        return self.opponent is not None and self.creator is not None
+#     def is_ready(self):
+#         return self.opponent is not None and self.creator is not None
 
-    def start_game(self):
-        self.game = GameModel.make_new_game(self.room_id, self.creator, self.opponent)
+#     def start_game(self):
+#         self.game = GameModel.make_new_game(self.room_id, self.creator, self.opponent)
 
 
 # TODO: подумать, добавить ли сюда обработку активного игрока, а то сейчас это делается в рутах
@@ -191,6 +205,13 @@ class RoomModel:
         self._game_manager = GameManager(self)
         self._game_setter = None
 
+    @property
+    def white_player(self):
+        return self._game_manager._white_player
+    @property
+    def black_player(self):
+        return self._game_manager._black_player
+
     @staticmethod
     def get_from_database():
         cur.execute('''
@@ -240,15 +261,30 @@ class RoomModel:
         return self._viewer_manager.viewers
     
     def set_player(self, user):
-        if self._game_setter is None:
-            self._game_setter = GameSetter(self.id, user)
-        else:
-            self._game_setter.join_user(user)
-    
+        self._game_manager.set_player(user)
+    def is_player_set(self, user):
+        return self._game_manager.is_player_set(user)
     def is_ready_to_start(self):
-        return self._game_setter is not None and self._game_setter.is_ready()
-    
+        return self._game_manager.is_ready_to_start()
     def start_game(self):
-        self._game_setter.start_game()
+        self._game_manager.start_game()
+    def handle_move(self, move):
+        return self._game_manager.handle_move(move)
+    def get_outcome(self):
+        return self._game_manager.get_outcome()
+    def get_game(self):
+        return self._game_manager.get_game()
+    
+    # # def set_player(self, user):
+    #     # if self._game_setter is None:
+    #     #     self._game_setter = GameSetter(self.id, user)
+    #     # else:
+    #     #     self._game_setter.join_user(user)
+    
+    # def is_ready_to_start(self):
+    #     # return self._game_setter is not None and self._game_setter.is_ready()
+    
+    # def start_game(self):
+    #     # self._game_setter.start_game()
 
 __all__ = ['RoomModel']

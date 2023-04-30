@@ -74,27 +74,31 @@ export default class CheckerGame extends React.Component {
             .then(response => response.json())
             .then(obj => {
                 this.setState({
-                    field: obj.field,
-                    order: obj.order
-                })
+                    field: obj.game.field,
+                    order: obj.game.is_white_move
+                });
             });
 
         this.props.socket.on('made_move', (json) => {
-            let {field, move, ...rest} = JSON.parse(json);
-            // console.log(field, move, this);
-            if (!move.is_possible) {
-                // display error message
-                this.setState({
-                    fieldSelected: false
-                });
-                return;
-            }
-            console.log(field);
+            let {game, move} = JSON.parse(json);
             this.setState({
-                field: field,
-                order: move.changes_order ^ move.is_white_player,
-                fieldSelected: false
+                field: game.field,
+                order: game.is_white_move
             });
+            // console.log(field, move, this);
+            // if (!move.is_possible) {
+            //     // display error message
+            //     this.setState({
+            //         fieldSelected: false
+            //     });
+            //     return;
+            // }
+            // console.log(field);
+            // this.setState({
+            //     field: field,
+            //     order: move.changes_order ^ move.is_white_player,
+            //     fieldSelected: false
+            // });
         });
     }
 
