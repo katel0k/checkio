@@ -25,7 +25,7 @@ function User(props) {
                 </div>
             </div>
             <div className="user__close">&times;</div>
-            <div className="user__color"></div>
+            <div className={"user__color " + (props.color)}></div>
         </div>);
 }
 
@@ -78,44 +78,44 @@ function GameSetter(props) {
         <div className="settings__types__wrapper">
             <div className="settings__types">
                 <div className="settings__types_group">
-                    <input type="radio" id="ru" name="type" />
-                    <label for="ru">Русские правила</label>
+                    <input type="radio"/>
+                    <label>Русские правила</label>
                 </div>
                 <div className="settings__types_group">
-                    <input type="radio" id="en" name="type" />
-                    <label for="ru">Английские правила</label>
+                    <input type="radio"/>
+                    <label>Английские правила</label>
                 </div>
                 <div className="settings__types_group">
-                    <input type="radio" id="intl" name="type" />
-                    <label for="ru">Международные правила</label>
+                    <input type="radio"/>
+                    <label>Международные правила</label>
                 </div>
                 <div className="settings__types_group">
-                    <input type="radio" id="own" checked name="type" />
-                    <label for="ru">Свои правила</label>
+                    <input type="radio"/>
+                    <label>Свои правила</label>
                 </div>
             </div>
 
 
             <div className="settings__rules">
                 <div className="settings__rules_group">
-                    <input type="checkbox" id="ru" />
-                    <label for="ru">Белые ходят первые</label>
+                    <input type="checkbox" />
+                    <label>Белые ходят первые</label>
                 </div>
                 <div className="settings__rules_group">
-                    <input type="checkbox" id="en" />
-                    <label for="ru">Простая шашка может есть назад</label>
+                    <input type="checkbox" />
+                    <label>Простая шашка может есть назад</label>
                 </div>
                 <div className="settings__rules_group">
-                    <input type="checkbox" id="intl" />
-                    <label for="ru">Шашка может превращаться в двамку</label>
+                    <input type="checkbox" />
+                    <label>Шашка может превращаться в двамку</label>
                 </div>
                 <div className="settings__rules_group">
-                    <input type="checkbox" id="own" />
-                    <label for="ru">Дамка может вставать на произвольное поле</label>
+                    <input type="checkbox" />
+                    <label>Дамка может вставать на произвольное поле</label>
                 </div>
                 <div className="settings__rules_group">
-                    <input type="checkbox" id="own" />
-                    <label for="ru">Дамка может ходить на несколько полей</label>
+                    <input type="checkbox" />
+                    <label>Дамка может ходить на несколько полей</label>
                 </div>
             </div>
         </div>
@@ -233,9 +233,9 @@ export default class Room extends React.Component {
                 <div className="container">
                     <div className="waiting__container">
                         <div className="users__wrapper">
-                            <User userInfo={this.state.whitePlayer}/>
+                            <User userInfo={this.state.whitePlayer} color='white'/>
                             <GamePlay userList={this.state.viewers}/>
-                            <User userInfo={this.state.blackPlayer}/>
+                            <User userInfo={this.state.blackPlayer} color='black'/>
                         </div>
                         {
                             this.state.state == waiting_state ?

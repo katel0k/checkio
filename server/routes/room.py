@@ -159,8 +159,3 @@ def user_route():
 @server.route('/user/<int:user_id>')
 def user_by_id_route(user_id):
     return current_user.id # TODO
-
-@server.route('/<path:path>')
-@server.route('/room/<path:path>')
-def get_file(path):
-    return send_from_directory('static', path)
