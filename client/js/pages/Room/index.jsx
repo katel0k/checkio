@@ -5,30 +5,28 @@ const { io } = require("socket.io-client");
 const socket = io();
 
 function User(props) {
-    if (props.userInfo) {
+    if (!props.userInfo) {
         return (
-            <div className="game__user">
-                <div className="game__user__info">
-                    <div className="game__user__info_name">{props.userInfo.nickname}</div>
-                    <div className="game__user__info_rate">
-                        <div><i className="fa-solid fa-signal"></i></div> 
-                        <div className="rate">{props.userInfo.rating}</div>
-                    </div>
-    
-                </div>
-                <div className="game__user__round">
-                    <img src="/client/img/user_photo/user1.png" alt="Ы" />
-                </div>
-            </div>
-        );
-    }
-    else {
-        return (
-            <div className="game__user">
+            <div className="user">
                 Пользователь еще не подключился
             </div>
         )
-    }   
+    }
+    return (
+        <div className="user">
+            <div className="user__round">
+                <img src="img/user_photo/user1.png" alt="" />
+            </div>
+            <div className="user__info">
+                <div className="user_name">{props.userInfo.nickname}</div>
+                <div className="user_rate">
+                    <div><i className="fa-solid fa-signal" style={{color: "#ffffff"}}></i></div>
+                    <div className="rate">{props.userInfo.rating}</div>
+                </div>
+            </div>
+            <div className="user__close">&times;</div>
+            <div className="user__color"></div>
+        </div>);
 }
 
 function UserList(props) {
@@ -76,20 +74,59 @@ function GamePlay(props) {
 
 function GameSetter(props) {
     return (
-        <div className="container">
-            <div className="settings__wrapper">
-                <div className="settings__users">
-                    <div className="settings__user">
-                        <div className="game__user__round">
-                            <img src="img/user_photo/user1.png" alt="" />
-                        </div>
-                        <button className="btn btn_game" 
-                            onClick={props.handleConnectBtnClick}>Подключиться</button>
-                    </div>
+    <div className="settings__wrapper">
+        <div className="settings__types__wrapper">
+            <div className="settings__types">
+                <div className="settings__types_group">
+                    <input type="radio" id="ru" name="type" />
+                    <label for="ru">Русские правила</label>
+                </div>
+                <div className="settings__types_group">
+                    <input type="radio" id="en" name="type" />
+                    <label for="ru">Английские правила</label>
+                </div>
+                <div className="settings__types_group">
+                    <input type="radio" id="intl" name="type" />
+                    <label for="ru">Международные правила</label>
+                </div>
+                <div className="settings__types_group">
+                    <input type="radio" id="own" checked name="type" />
+                    <label for="ru">Свои правила</label>
+                </div>
+            </div>
+
+
+            <div className="settings__rules">
+                <div className="settings__rules_group">
+                    <input type="checkbox" id="ru" />
+                    <label for="ru">Белые ходят первые</label>
+                </div>
+                <div className="settings__rules_group">
+                    <input type="checkbox" id="en" />
+                    <label for="ru">Простая шашка может есть назад</label>
+                </div>
+                <div className="settings__rules_group">
+                    <input type="checkbox" id="intl" />
+                    <label for="ru">Шашка может превращаться в двамку</label>
+                </div>
+                <div className="settings__rules_group">
+                    <input type="checkbox" id="own" />
+                    <label for="ru">Дамка может вставать на произвольное поле</label>
+                </div>
+                <div className="settings__rules_group">
+                    <input type="checkbox" id="own" />
+                    <label for="ru">Дамка может ходить на несколько полей</label>
                 </div>
             </div>
         </div>
-    );
+
+        <div className="settings__connect__wrapper">
+            <button className="btn btn_game" onClick={props.handleConnectBtnClick}>Подключиться</button>
+            <button className="btn btn_game" onClick={props.handleConnectBtnClick}>Подключиться</button>
+        </div>
+
+    </div>
+        );
 }
 
 
@@ -192,18 +229,22 @@ export default class Room extends React.Component {
 
     render() {
         return (
-            <div className="container">
-                <div className="game__wrapper">
-                    <User userInfo={this.state.whitePlayer}/>
-                    <GamePlay userList={this.state.viewers}/>
-                    <User userInfo={this.state.blackPlayer}/>
-                    {
-                        this.state.state == waiting_state ?
-                        <GameSetter handleConnectBtnClick={this.handleConnectBtnClick.bind(this)} /> :
-                        <CheckersUI playerColor={this.state.self.color} roomId={this.state.roomId} socket={socket}/>
-                    }
+            <section className="waiting">
+                <div className="container">
+                    <div className="waiting__container">
+                        <div className="users__wrapper">
+                            <User userInfo={this.state.whitePlayer}/>
+                            <GamePlay userList={this.state.viewers}/>
+                            <User userInfo={this.state.blackPlayer}/>
+                        </div>
+                        {
+                            this.state.state == waiting_state ?
+                            <GameSetter handleConnectBtnClick={this.handleConnectBtnClick.bind(this)} /> :
+                            <CheckersUI playerColor={this.state.self.color} roomId={this.state.roomId} socket={socket}/>
+                        }
+                    </div>
                 </div>
-            </div>
+            </section>
         );
     }
 }
