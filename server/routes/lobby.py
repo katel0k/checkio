@@ -2,7 +2,7 @@ from flask import render_template, request, redirect
 from flask_login import current_user
 from flask_socketio import join_room
 
-from ..database_models import RoomModel
+from ..database import RoomModel
 import json
 from ..forms import LoginForm, RegisterForm
 from server import app

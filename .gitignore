@@ -3,5 +3,4 @@ package-lock.json
 server/virt
 __pycache__/
 dist/
-server/database
-client/arina-git
+server/database-git

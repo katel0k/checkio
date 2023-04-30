@@ -1,4 +1,4 @@
-from ..database_models import *
+from ..database import *
 from server import app
 from flask import request, render_template, send_from_directory, redirect, make_response, session
 from flask_socketio import emit, join_room, leave_room, rooms

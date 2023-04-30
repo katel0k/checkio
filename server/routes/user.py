@@ -1,6 +1,6 @@
 from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_login import current_user, login_user, logout_user
-from ..database_models import *
+from ..database import *
 from ..forms import LoginForm, RegisterForm
 from server import app
 
