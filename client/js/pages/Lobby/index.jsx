@@ -22,12 +22,16 @@ class RoomMenu extends React.Component {
             });
         });
 
+        socket.emit('user_joined_lobby');
+
         socket.on('room_list_updated', (id, newState, newPlayersAmount) => {
             this.setState({
-                ...this.state.roomList,
-                [id]: {
-                    state: newState,
-                    playersAmount: newPlayersAmount
+                roomList: {
+                    ...this.state.roomList,
+                    [id]: {
+                        state: newState,
+                        playersAmount: newPlayersAmount
+                    }
                 }
             });
         });

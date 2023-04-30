@@ -1,48 +1,16 @@
 from ..database_models import *
 from server import app
-# from .application import Application
-# app = Application()
 from flask import request, render_template, send_from_directory, redirect, make_response
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user
 import json
 
-# from models import *
-import random
 from ..game_logic import GameMove
-# from setup_db import conn, cur
 import sys
 import copy
 
 server = app
 socketio = app.socketio
-
-
-@server.route('/room', methods=['GET', 'POST'])
-def room_route():
-    if request.method == 'GET':
-        return json.dumps({
-            "room_list": dict(map(
-                lambda room_id:
-                    (room_id, {
-                        "state": app.room_list[room_id]._state,
-                        "playersAmount": len(app.room_list[room_id].viewers)
-                    }),
-                app.room_list
-            ))
-            })
-    elif request.method == 'POST':
-        room = RoomModel.make_new_room()
-        app.room_list[room.id] = room
-        return redirect(f'room/{room.id}/')
-    else:
-        pass
-
-    return '<h1>Room</h1>'
-
-@server.route('/room/random')
-def room_random():
-    return redirect('/room/' + str(random.choice(list(app.room_list.keys()))))
 
 @server.route('/room/<int:room_id>/')
 def room_id_route(room_id):
@@ -137,8 +105,6 @@ def room_id_game_route(room_id):
     if room_id not in app.room_list:
         return make_response('Incorrect room id, no such room exists', 400)
     game_obj = app.room_list[room_id]._game_setter.game
-    # print(current_user.get_id(), file=sys.stderr)
-    # print(room._game_setter.game.white_player, file=sys.stderr)
     return json.dumps({
         'field': game_obj.game.field,
         'order': game_obj.game.is_white_move,
@@ -150,11 +116,11 @@ def room_id_game_route(room_id):
 
 @socketio.on('join')
 def join_event_handler(room_id):
-    # print(room_id, file=sys.stderr)
     room = app.room_list[room_id]
     room.connect_user(copy.copy(current_user))
     join_room(room)
-    emit('player_joined', {
+    socketio.emit('room_list_updated', (room.id, room._state, len(room.viewers)), to=app.lobby)
+    socketio.emit('player_joined', {
         user_id: {
             'nickname': viewer.user.nickname
         } for (user_id, viewer) in room.viewers.items()
