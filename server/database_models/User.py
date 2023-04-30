@@ -1,9 +1,7 @@
 from flask_login import UserMixin
-# from setup_db import cur, conn
 from psycopg2 import sql
 from server import app
 from werkzeug.security import generate_password_hash, check_password_hash
-# from database_models import conn, cur
 
 cur = app.db.cur
 conn = app.db.conn
@@ -18,8 +16,6 @@ class RegisterError(Exception):
     def __init__(self, msg=None):
         super().__init__(msg)
 
-# TODO: separate into another file
-# TODO: write database module for all transactions
 class User(UserMixin):
     def __init__(self, **kwargs):
         super()
@@ -142,6 +138,6 @@ class User(UserMixin):
         return self.id
 
     def __str__(self):
-        return 'id: %s, email: %s, username: %s' % (self.id, self.email, self.username)
+        return 'id: %s, email: %s, nickname: %s' % (self.id, self.email, self.nickname)
     def __repr__(self):
         return self.__str__()

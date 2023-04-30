@@ -1,7 +1,7 @@
 from ..database_models import *
 from server import app
-from flask import request, render_template, send_from_directory, redirect, make_response
-from flask_socketio import emit, join_room, leave_room
+from flask import request, render_template, send_from_directory, redirect, make_response, session
+from flask_socketio import emit, join_room, leave_room, rooms
 from flask_login import current_user
 import json
 
@@ -117,7 +117,7 @@ def room_id_game_route(room_id):
 @socketio.on('join')
 def join_event_handler(room_id):
     room = app.room_list[room_id]
-    room.connect_user(copy.copy(current_user))
+    room.connect_user(current_user)
     join_room(room)
     socketio.emit('room_list_updated', (room.id, room._state, len(room.viewers)), to=app.lobby)
     socketio.emit('player_joined', {
@@ -127,6 +127,34 @@ def join_event_handler(room_id):
     }, to=room)
 
 
+# @socketio.on('disconnect')
+# def disconnect_event_handler():
+#     print(request.__dict__, file=sys.stderr)
+#     print(session.__dict__, file=sys.stderr)
+    
+    # if not current_user.is_authenticated:
+    #     return
+    # room = current_user.current_room
+    # print(room, file=sys.stderr)
+    # print(current_user, file=sys.stderr)
+    # if room is None:
+    #     return
+    # room.disconnect_user(current_user)
+    # current_user.disconnect_room(room)
+    # socketio.emit('room_list_updated', (room.id, room._state, len(room.viewers)), to=app.lobby)
+    # for room in rooms():
+    #     print(room, file=sys.stderr)
+    #     leave_room(room)
+
+# @socketio.on('client_disconnecting')
+# def client_disconnecting_event_handler(room_id, user_id):
+#     print(room_id, user_id, file=sys.stderr)
+#     if room_id not in app.room_list: return
+#     room = app.room_list[room_id]
+#     user = User.load_user(user_id)
+#     if not room.has_user(user): return
+#     room.disconnect_user(user)
+#     socketio.emit('room_list_updated', (room.id, room._state, len(room.viewers)), to=app.lobby)
 
 @socketio.on('join_game')
 def join_game_event_handler(room_id):

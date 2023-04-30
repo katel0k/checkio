@@ -157,6 +157,15 @@ export default class Room extends React.Component {
             });
         });
 
+        // window.onbeforeunload = function () {
+        //     socket.emit('client_disconnecting', 
+        //         {
+        //             room_id: this.state.roomId,
+        //             user_id: this.state.self.id
+        //         }
+        //         );
+        // }
+
         fetch(new URL('info', location.href))
             .then(response => response.json())
             .then(obj => {

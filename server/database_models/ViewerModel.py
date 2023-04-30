@@ -5,10 +5,11 @@ import json
 from server import app
 cur = app.db.cur
 conn = app.db.conn
+import copy
 
 class ViewerModel:
     def __init__(self, user, room_id):
-        self.user = user
+        self.user = copy.copy(user)
         self.room_id = room_id
 
     @staticmethod
