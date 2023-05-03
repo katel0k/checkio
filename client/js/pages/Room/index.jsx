@@ -15,7 +15,7 @@ function User(props) {
     return (
         <div className="user">
             <div className="user__round">
-                <img src="img/user_photo/user1.png" alt="" />
+                <img src="/client/img/user_photo/user1.png" alt="" />
             </div>
             <div className="user__info">
                 <div className="user_name">{props.userInfo.nickname}</div>
@@ -40,7 +40,7 @@ function UserList(props) {
                             ([id, {nickname}], i) => 
                             <div className="guests__item" key={i}>
                                 <div className="guests__round">
-                                    <img src="img/user_photo/user1.png" alt="S" />
+                                    <img src="/client/img/user_photo/user1.png" alt="S" />
                                 </div>
                                 <div className="guests__round__status"></div>
                                 <div className="guests__descr">

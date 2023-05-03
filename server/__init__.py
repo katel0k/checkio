@@ -1,14 +1,8 @@
-# from .application import Application
-from .application import create_app
-app = create_app()
-# app = Application()
-# import sys
-# print(app, file=sys.stderr)
-# app.run()
+import sys
 
-# from flask import appcontext_tearing_down
-# appcontext_tearing_down.connect(app.db.close, app.server)
+# args = {arg.split('=')[0]: arg.split('=')[1] for arg in sys.argv[1:]}
+args = {}
+from .application import create_app
+app = create_app(**args)
 
 from .routes import *
-
-# app.room_list = models.Room.get_from_database()

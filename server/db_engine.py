@@ -1,18 +1,14 @@
 import psycopg2
-
-# import sys
+# import config
 
 class DB:
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.conn = psycopg2.connect(user='postgres', 
-                        host='172.17.0.2', port='5432', password='admin')
+                        host='172.17.0.2', port=kwargs.get('DATABASE_PORT', 5432), password='admin')
 
         self.cur = self.conn.cursor()
-        # print(self.conn, self.cur, file=sys.stderr)
     
     def close(self, *args, **kwargs):
-        # print('close', file=sys.stderr)
-        # print(sender, extra, file=sys.stderr)
         self.cur.close()
         self.conn.close()
     def __del__(self):

@@ -1,3 +1,3 @@
-# class Config(object):
-DEBUG = True
-SECRET_KEY = 'shaurma'
+config = {
+    'SECRET_KEY': 'SHAURMA'
+}
