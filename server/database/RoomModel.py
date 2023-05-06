@@ -1,7 +1,4 @@
-# from database_models import conn, cur, GameModel, ViewerModel
 from psycopg2 import sql
-# from ..application import Application
-# app = Application()
 from .User import *
 from .PlayerModel import *
 from .GameModel import *
@@ -123,37 +120,6 @@ class GameManager:
     def finish_game(self):
         self._black_player = None
         self._state = GameManagerSetupState()
-
-# class GameSetter:
-#     def __init__(self, room):
-#         self._room = room
-        
-
-#     def __init__(self, room_id, user):
-#         # TODO: если расширять этот интерфейс для других игр, ему потребуется переработка
-#         # тогда можно будет сделать его более полным
-#         # также надо будет добавить сеттер/геттер для настроек игры
-#         self.room_id = room_id
-#         self.creator = user
-#         self.opponent = None
-#         self.game = None
-
-#     @staticmethod
-#     def create_game(user):
-#         # TODO: add game types
-#         return GameManager(user)
-    
-#     def join_user(self, user):
-#         self.opponent = user
-
-#     def is_playing(self):
-#         return self.game is not None
-    
-#     def is_ready(self):
-#         return self.opponent is not None and self.creator is not None
-
-#     def start_game(self):
-#         self.game = GameModel.make_new_game(self.room_id, self.creator, self.opponent)
 
 
 # TODO: подумать, добавить ли сюда обработку активного игрока, а то сейчас это делается в рутах
@@ -283,17 +249,14 @@ class RoomModel:
     def finish_game(self):
         self._game_manager.finish_game()
         self.state = WAITING
-    
-    # # def set_player(self, user):
-    #     # if self._game_setter is None:
-    #     #     self._game_setter = GameSetter(self.id, user)
-    #     # else:
-    #     #     self._game_setter.join_user(user)
-    
-    # def is_ready_to_start(self):
-    #     # return self._game_setter is not None and self._game_setter.is_ready()
-    
-    # def start_game(self):
-    #     # self._game_setter.start_game()
+
+
+'''
+класс комнаты обрабатывает собственное состояние включая события в комнате
+room.handle(event_name, *args)
+
+
+
+'''
 
 __all__ = ['RoomModel']

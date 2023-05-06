@@ -1,5 +1,5 @@
 # import .game_logic as game_logic
-from ..game_logic import *
+from ..routes.room.game_logic import Game
 # from database_models import cur, conn, PlayerModel
 import sys
 # from ..application import Application
