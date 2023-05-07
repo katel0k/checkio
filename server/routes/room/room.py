@@ -4,8 +4,8 @@ from flask_socketio import join_room, emit
 from flask import session
 from typing import Dict
 
-from ...database import RoomStates, RoomModel, UserModel
-from ...database.services import RoomService
+from ...database import RoomStates, RoomModel, UserModel, GameModel
+from ...database.services import RoomService, GameService
 from ...database.services.UserService import UserDTO
 
 socketio = app.socketio
@@ -126,6 +126,7 @@ class GameLoop:
         self.white_player: UserModel = None
         self.black_player: UserModel = None
         self.game: Game = None
+        self.game_model: GameModel = None
         
     def handle_event(self, event: str, *args, **kwargs):
         self.__strategy.handle_event(event, *args, **kwargs)
@@ -154,6 +155,7 @@ class GameLoopStrategy:
 class GameLoopSetupStrategy(GameLoopStrategy):
     def __init__(self, game_loop: GameLoop):
         super().__init__(game_loop)
+        self.game_loop.game_model = None
         self.game_loop.game = None
 
     def handle_join_game_event(self, *args, **kwargs):
@@ -185,13 +187,19 @@ class GameLoopPlayingStrategy(GameLoopStrategy):
     def __init__(self, game_loop: GameLoop):
         # TODO: добавить здесь параметры игры
         super().__init__(game_loop)
+        self.game_loop.game_model = GameService.make_new_game(
+            self.game_loop.room, self.game_loop.white_player, self.game_loop.black_player)
         self.game_loop.game = Game()
 
     def handle_move_event(self, move, *args, **kwargs):
-        move = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
+        move: GameMove = GameMove((move['y0'], move['x0']), (move['y'], move['x']), move['player_color'])
         if move.is_white_player is None: return
 
         move = self.game_loop.game.handle_move(move)
+        if move.is_possible:
+            GameService.make_new_move(self.game_loop.game_model, str(move), len(self.game_loop.game.history), 
+                    self.game_loop.white_player if move.is_white_player else self.game_loop.black_player)
+
         emit('made_move', json.dumps({
             'game': GameDTO(self.game_loop.game),
             'move': move
