@@ -64,9 +64,9 @@ def join_game_event_handler(room_id):
         'nickname': current_user.nickname,
         'rating': current_user.rating
     }, to=room)
-    print(room.is_ready_to_start(), file=sys.stderr)
-    print(room.white_player, file=sys.stderr)
-    print(room.black_player, file=sys.stderr)
+    # print(room.is_ready_to_start(), file=sys.stderr)
+    # print(room.white_player, file=sys.stderr)
+    # print(room.black_player, file=sys.stderr)
     if room.is_ready_to_start():
         room.start_game()
         socketio.emit('game_started',
@@ -89,10 +89,34 @@ def move_handler(room_id, move):
         }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4), to=room)
 
-@server.route('/user')
-def user_route():
-    return current_user.id # TODO
+# from ...database import ViewerModel
 
-@server.route('/user/<int:user_id>')
-def user_by_id_route(user_id):
-    return current_user.id # TODO
+# class ViewerManager:
+#     '''Вспомогательный класс для класса RoomModel. Менеджит всех людей в комнате(наблюдателей)
+#     Эти люди точно будут получать уведомления, о том, что происходит в комнате и о них должны быть записи в БД'''
+#     def __init__(self, room, **kwargs):
+#         '''Конструктор может получить на вход viewers - словарь пользователей, если комната подгружается из БД'''
+#         self._viewers = kwargs.get('viewers', dict())
+#         self._room = room
+
+#     def has_user(self, user):
+#         return user.id in self.viewers
+    
+#     def connect_user(self, user):
+#         if self.has_user(user): return
+#         self.viewers[user.id] = ViewerModel.make_new_viewer(user, self._room)
+        
+#     def disconnect_user(self, user):
+#         if not user.id in self.viewers: return
+#         viewer = self.viewers[user.id]
+#         viewer.leave_room()
+#         self.viewers.pop(user.id)
+    
+#     @property
+#     def viewers(self):
+#         return self._viewers
+
+
+# class Room:
+#     def __init__(self, model):
+#         self.__model = model

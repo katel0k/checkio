@@ -6,7 +6,10 @@
 
 # этот порядок специфичен, не трогать
 # from server import app
-from .User import *
+# from .User import *
+from .models import UserModel
+from .services import *
+# from .services.UserService import *
 from .PlayerModel import *
 from .GameModel import *
 from .ViewerModel import *

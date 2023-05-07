@@ -122,7 +122,6 @@ class GameManager:
         self._state = GameManagerSetupState()
 
 
-# TODO: подумать, добавить ли сюда обработку активного игрока, а то сейчас это делается в рутах
 class ViewerManager:
     '''Вспомогательный класс для класса RoomModel. Менеджит всех людей в комнате(наблюдателей)
     Эти люди точно будут получать уведомления, о том, что происходит в комнате и о них должны быть записи в БД'''
@@ -150,22 +149,9 @@ class ViewerManager:
 
 
 
-# class RoomState(Enum):
 WAITING = 'waiting'
 PLAYING = 'playing'
 DEAD = 'dead'
-
-
-# что этот класс должен уметь:
-
-# менеджмент пользоваетелй:
-#     - подключаются viewers
-        # connect_user(user)
-#     - отключаются viewers
-        # disconnect_user(user)
-# менеджмент игры:
-# 
-# менеджмент базы данных
 
 
 class RoomModel:

@@ -74,3 +74,11 @@ def room_id_game_route(room_id):
             'game': room.get_game()
             }, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4)
+
+@server.route('/user')
+def user_route():
+    return current_user.id # TODO
+
+@server.route('/user/<int:user_id>')
+def user_by_id_route(user_id):
+    return current_user.id # TODO
