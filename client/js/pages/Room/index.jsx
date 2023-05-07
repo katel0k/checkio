@@ -131,8 +131,8 @@ function GameSetter(props) {
 
 
 
-const waiting_state = 'waiting';
-const playing_state = 'playing';
+const waiting_state = 'WAITING';
+const playing_state = 'PLAYING';
 
 export default class Room extends React.Component {
     constructor(props) {
@@ -152,10 +152,10 @@ export default class Room extends React.Component {
     }
 
     componentDidMount() {
-        socket.on('player_joined', (viewers) => {
+        socket.on('player_joined', (player) => {
             this.setState({
                 viewers: {
-                    ...viewers,
+                    [player.id]: player,
                     ...this.state.viewers
                 }
             });
@@ -168,7 +168,6 @@ export default class Room extends React.Component {
         });
 
         socket.on('game_started', (obj) => {
-            console.log(obj);
             let color = undefined;
             if (this.state.self.id == obj.white_player.id)
                 color = 'white'
@@ -228,6 +227,7 @@ export default class Room extends React.Component {
     }
 
     render() {
+        console.log(this.state.viewers);
         return (
             <section className="waiting">
                 <div className="container">

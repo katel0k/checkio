@@ -5,9 +5,11 @@ class UserDTO(dict):
         dict.__init__(
             self,
             id = user.id,
-            email = user.email,
             nickname = user.nickname,
+            rating = user.rating
         )
+
+
 
 # class RoomDTO(dict):
 #     def __init__(self, room: RoomModel):

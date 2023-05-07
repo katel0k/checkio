@@ -25,9 +25,10 @@ class RatingHistoryModel:
         self.previous_rating: str = previous_rating
 
 class RoomStates(Enum):
-    WAITING = 'waiting'
-    PLAYING = 'playing'
-    DEAD = 'dead'
+    WAITING = 'WAITING'
+    PLAYING = 'PLAYING'
+    DEAD = 'DEAD'
+    
 
 class RoomModel:
     def __init__(self, id: int, state: RoomStates, created_dttm: str):
@@ -42,11 +43,11 @@ class RoomHistoryModel:
         self.previous_state: str = previous_state
 
 class GameOutcomes(Enum):
-    PLAYING = 'playing'
-    WHITE_WON = 'white_won'
-    BLACK_WON = 'black_won'
-    DRAW = 'draw'
-    CANCELLED = 'cancelled'
+    PLAYING = 'PLAYING'
+    WHITE_WON = 'WHITE_WON'
+    BLACK_WON = 'BLACK_WON'
+    DRAW = 'DRAW'
+    CANCELLED = 'CANCELLED'
 
 class GameModel:
     def __init__(self, id: int, room_id: int, outcome: GameOutcomes, started_dttm: str):

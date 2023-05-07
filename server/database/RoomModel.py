@@ -1,5 +1,5 @@
 from psycopg2 import sql
-from .User import *
+# from .User import *
 from .PlayerModel import *
 from .GameModel import *
 from .ViewerModel import *

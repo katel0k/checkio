@@ -36,6 +36,7 @@ def register_new_user(email: str, password: str, nickname: str) -> UserModel | N
             generate_password_hash(password),
             nickname)
     )
+    conn.commit()
     user_tuple = cur.fetchone()
     return make_user(user_tuple)
 
