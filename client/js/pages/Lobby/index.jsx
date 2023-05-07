@@ -24,14 +24,11 @@ class RoomMenu extends React.Component {
 
         socket.emit('user_joined_lobby');
 
-        socket.on('room_list_updated', (id, newState, newPlayersAmount) => {
+        socket.on('room_list_updated', (id, room) => {
             this.setState({
                 roomList: {
                     ...this.state.roomList,
-                    [id]: {
-                        state: newState,
-                        playersAmount: newPlayersAmount
-                    }
+                    [id]: room
                 }
             });
         });
@@ -46,7 +43,7 @@ class RoomMenu extends React.Component {
                             <div className="room-menu__entry" key={room_id}>
                                 <span>{room_id}</span>
                                 <span>{room.state}</span>
-                                <span>{room.playersAmount}</span>
+                                <span>{room.viewers.length}</span>
                                 <a href={"/room/" + room_id} className="connect-btn">Подключиться</a>
                             </div>
                     )

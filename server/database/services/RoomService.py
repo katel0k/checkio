@@ -25,6 +25,12 @@ def make_new_room() -> RoomModel | None:
     room_tuple = cur.fetchone()
     return make_room(room_tuple)
 
+def change_state(room: RoomModel, new_state: RoomStates):
+    '''Изменяет объект комнаты'''
+    cur.execute('''UPDATE rooms SET state=%s WHERE id=%s''', (new_state.value, room.id))
+    conn.commit()
+    room.state = new_state
+
 def join_user(room: RoomModel, user: UserModel) -> ViewerModel:
     cur.execute('''INSERT INTO viewers 
         (user_id, room_id) VALUES (%s, %s)

@@ -5,6 +5,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 conn = app.db.conn
 cur = app.db.cur
 
+class UserDTO(dict):
+    def __init__(self, user: UserModel):
+        dict.__init__(
+            self,
+            id = user.id,
+            nickname = user.nickname,
+            rating = user.rating
+        )
+
 def make_user(user_tuple: tuple | None) -> UserModel | None:
     '''Все функции ниже используют вызовы из постгреса, возвращающие формат
     id, email, password_hash, nickname, rating, privileges. Эта функция для того чтобы убрать повторение'''

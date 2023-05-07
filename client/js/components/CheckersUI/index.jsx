@@ -112,7 +112,7 @@ export default class CheckerGame extends React.Component {
                 y: row,
                 player_color: is_white_player
             };
-            this.props.socket.emit('made_move', this.props.roomId, move);
+            this.props.socket.emit('made_move', move);
         }
         else {
             if (!this.state.field[row][col].is_empty) {
