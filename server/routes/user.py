@@ -1,6 +1,6 @@
 from flask import redirect
 from flask_login import current_user, login_user, logout_user
-from ..forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm
 from server import app
 from ..database.services import UserService
 

@@ -4,7 +4,7 @@ from flask_socketio import join_room
 
 from ..database import RoomModel
 import json
-from ..forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm
 from server import app
 import random
 

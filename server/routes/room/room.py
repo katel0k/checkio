@@ -188,7 +188,7 @@ class GameLoopPlayingStrategy(GameLoopStrategy):
         # TODO: добавить здесь параметры игры
         super().__init__(game_loop)
         self.game_loop.game_model = GameService.make_new_game(
-            self.game_loop.room, self.game_loop.white_player, self.game_loop.black_player)
+            self.game_loop.room.model, self.game_loop.white_player, self.game_loop.black_player)
         self.game_loop.game = Game()
 
     def handle_move_event(self, move, *args, **kwargs):
