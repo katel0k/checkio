@@ -21,7 +21,7 @@ class RoomDTO(dict):
     def __init__(self, room):
         dict.__init__(self,
             id = room.model.id,
-            state = room.model.state
+            state = room.model.state.value
         )
         self['user'] = UserDTO(current_user)
         self['viewers'] = UserManagerDTO(room.user_manager)

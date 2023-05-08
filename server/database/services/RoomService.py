@@ -9,7 +9,7 @@ def make_room(room_tuple: tuple | None) -> RoomModel | None:
     if room_tuple is None: return None
     return RoomModel(
         id=room_tuple[0],
-        state=room_tuple[1],
+        state=RoomStates.from_db_record(room_tuple[1]),
         created_dttm=room_tuple[2]
     )
 

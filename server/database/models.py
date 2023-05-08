@@ -28,7 +28,11 @@ class RoomStates(Enum):
     WAITING = 'WAITING'
     PLAYING = 'PLAYING'
     DEAD = 'DEAD'
-    
+    @staticmethod
+    def from_db_record(value: str):
+        if value == RoomStates.WAITING.value: return RoomStates.WAITING
+        if value == RoomStates.DEAD.value: return RoomStates.DEAD
+        if value == RoomStates.PLAYING.value: return RoomStates.PLAYING
 
 class RoomModel:
     def __init__(self, id: int, state: RoomStates, created_dttm: str):
@@ -48,6 +52,12 @@ class GameOutcomes(Enum):
     BLACK_WON = 'BLACK_WON'
     DRAW = 'DRAW'
     CANCELLED = 'CANCELLED'
+    def from_db_record(value: str):
+        if value == GameOutcomes.WHITE_WON.value: return GameOutcomes.WHITE_WON
+        if value == GameOutcomes.BLACK_WON.value: return GameOutcomes.BLACK_WON
+        if value == GameOutcomes.DRAW.value: return GameOutcomes.DRAW
+        if value == GameOutcomes.CANCELLED.value: return GameOutcomes.CANCELLED
+        if value == GameOutcomes.PLAYING.value: return GameOutcomes.PLAYING
 
 class GameModel:
     def __init__(self, id: int, room_id: int, outcome: GameOutcomes, started_dttm: str):

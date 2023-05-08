@@ -23,12 +23,21 @@ class RoomMenu extends React.Component {
         this.props.socket.emit('user_joined_lobby');
 
         this.props.socket.on('room_list_updated', (id, room) => {
-            this.setState({
-                roomList: {
-                    ...this.state.roomList,
-                    [id]: room
-                }
-            });
+            if (Object.entries(room.viewers).length == 0) {
+                let copy = this.state.roomList;
+                delete copy[id];
+                this.setState({
+                    roomList: copy
+                });
+            }
+            else {
+                this.setState({
+                    roomList: {
+                        ...this.state.roomList,
+                        [id]: room
+                    }
+                });
+            }
         });
     }
 

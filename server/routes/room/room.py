@@ -1,6 +1,7 @@
 from server import app
 from flask import session
-from ...database import RoomModel
+from ...database import RoomModel, RoomStates
+from ...database.services import RoomService
 from ..dto import *
 from .game_loop import GameLoop
 from .user_manager import UserManager
@@ -29,7 +30,12 @@ def debug(*args):
 def handle_disconnect():
     if 'room_id' not in session:
         return
-    app.room_list[session['room_id']].handle_event('disconnect')
+    room = app.room_list[session['room_id']]
+    room.handle_event('disconnect')
+    if len(room.user_manager.users) == 0:
+        RoomService.change_state(room.model, RoomStates.DEAD)
+        app.room_list.pop(room.model.id)
+        socketio.emit('room_list_updated', (room.model.id, RoomDTO(room)), to=app.lobby)
 
 # обработчик этого события отличается от других, потому что он кладет в сессию айдишник комнаты
 @socketio.on('join')
