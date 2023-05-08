@@ -1,5 +1,5 @@
 from server import app
-from ..models import GameModel, RoomModel, UserGamesModel, UserModel, TurnModel
+from ..models import GameModel, RoomModel, UserModel, TurnModel, GameOutcomes
 
 conn = app.db.conn
 cur = app.db.cur
@@ -43,3 +43,12 @@ def make_new_move(game: GameModel, body: str, index: int, user: UserModel) -> Tu
         dttm = res[3],
         index = res[4]
     )
+
+def change_outcome(game: GameModel, new_outcome: GameOutcomes):
+    cur.execute('''UPDATE games SET outcome=%s WHERE id=%s''', (new_outcome, game.id))
+    cur.execute('''UPDATE users SET rating=rating+1
+      FROM (
+        SELECT users.id FROM users JOIN user_games ON (users.id = user_games.user_id)
+        WHERE %s='WHITE_WON' AND is_white OR %s='BLACK_WON' AND NOT is_white
+    ) AS valid_users WHERE valid_users.id = users.id''')
+    conn.commit()

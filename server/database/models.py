@@ -14,10 +14,6 @@ class UserModel(UserMixin):
         '''Необходимо для плагина flask_login'''
         return self.id
 
-    # FIXME: ЗАГЛУШКА УБРАТЬ ДЕЛЕТЕ
-    def __json__(self) -> str:
-        return ''
-
 class RatingHistoryModel:
     def __init__(self, user_id: int, changed_dttm: str, previous_rating: str):
         self.user_id: int = user_id

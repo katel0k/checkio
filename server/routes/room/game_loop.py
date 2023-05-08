@@ -99,6 +99,9 @@ class GameLoopPlayingStrategy(GameLoopStrategy):
             'move': move
             }, default=lambda o: o.__dict__, 
                 sort_keys=True, indent=4), to=self.game_loop.room)
+        
+        if self.game_loop.game.outcome is not None:
+            GameService.change_outcome(self.game_loop.game_model, self.game_loop.game.outcome)
 
     def handle_event(self, event: str, *args, **kwargs):
         events_map = {

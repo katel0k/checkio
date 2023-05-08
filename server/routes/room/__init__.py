@@ -1,12 +1,9 @@
 from ...database import *
 from server import app
-from flask import request, render_template, redirect, make_response, session
+from flask import request, render_template, redirect, make_response
 from flask_login import current_user
 import json
 
-from .game_logic import GameMove
-import sys
-import copy
 from .room import *
 from ...database.services.RoomService import make_new_room
 
@@ -24,7 +21,6 @@ def room_route():
     elif request.method == 'POST':
         room = Room(make_new_room())
         app.room_list[room.model.id] = room
-        # FIXME: 1 - плейсхолдер
         socketio.emit('room_list_updated', (room.model.id, RoomDTO(room)), to=app.lobby)
         return redirect(f'room/{room.model.id}/')
 
