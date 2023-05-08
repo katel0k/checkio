@@ -48,6 +48,20 @@ add_room_event_handler('change_setting')
 add_room_event_handler('made_move')
 add_room_event_handler('left_game')
 
+
+from sys import stderr
+def debug(*args):
+    print(*args, file=stderr)
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    if 'room_id' not in session:
+        return
+    app.room_list[session['room_id']].handle_event('disconnect')
+    # debug(session['room_id'])
+    # debug(session.__dict__)
+
+# обработчик этого события отличается от других, потому что он кладет в сессию айдишник комнаты
 @socketio.on('join')
 def handle_join_event(room_id, *args, **kwargs):
     session['room_id'] = room_id
@@ -56,13 +70,12 @@ def handle_join_event(room_id, *args, **kwargs):
 class Room:
     def __init__(self, model: RoomModel):
         self.model: RoomModel = model
-        self.__user_manager: UserManager = UserManager(self)
+        self.user_manager: UserManager = UserManager(self)
         self.game_loop: GameLoop = GameLoop(self)
     
-    # FIXME: переделать, чтобы этот список лежал в комнате?
     def get_users(self):
-        return self.__user_manager.get_users()
+        return self.user_manager.get_users()
 
     def handle_event(self, event, *args, **kwargs):
-        self.__user_manager.handle_event(event, *args, **kwargs)
+        self.user_manager.handle_event(event, *args, **kwargs)
         self.game_loop.handle_event(event, *args, **kwargs)

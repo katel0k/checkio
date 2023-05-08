@@ -1,9 +1,6 @@
 import React from 'react';
 import CheckersUI from '../../components/CheckersUI';
 
-const { io } = require("socket.io-client");
-const socket = io();
-
 function User(props) {
     if (!props.userInfo) {
         return (
@@ -152,7 +149,7 @@ export default class Room extends React.Component {
     }
 
     componentDidMount() {
-        socket.on('player_joined', (player) => {
+        this.props.socket.on('player_joined', (player) => {
             this.setState({
                 viewers: {
                     [player.id]: player,
@@ -161,13 +158,13 @@ export default class Room extends React.Component {
             });
         });
 
-        socket.on('player_set', (player) => {
+        this.props.socket.on('player_set', (player) => {
             this.setState({
                 whitePlayer: player
             });
         });
 
-        socket.on('game_started', (obj) => {
+        this.props.socket.on('game_started', (obj) => {
             let color = undefined;
             if (this.state.self.id == obj.white_player.id)
                 color = 'white'
@@ -218,16 +215,16 @@ export default class Room extends React.Component {
                 return obj;
             })
             .then(({id}) => {
-                socket.emit('join', id);
+                this.props.socket.emit('join', id);
             });
     }
 
     handleConnectBtnClick() {
-        socket.emit('join_game', this.state.roomId);
+        this.props.socket.emit('join_game', this.state.roomId);
     }
 
     render() {
-        console.log(this.state.viewers);
+        // console.log(this.state.viewers);
         return (
             <section className="waiting">
                 <div className="container">

@@ -3,8 +3,6 @@ import {Link} from 'react-router-dom';
 
 import './Lobby.sass';
 
-import { io } from 'socket.io-client';
-const socket = io();
 
 class RoomMenu extends React.Component {
     constructor(props) {
@@ -22,9 +20,9 @@ class RoomMenu extends React.Component {
             });
         });
 
-        socket.emit('user_joined_lobby');
+        this.props.socket.emit('user_joined_lobby');
 
-        socket.on('room_list_updated', (id, room) => {
+        this.props.socket.on('room_list_updated', (id, room) => {
             this.setState({
                 roomList: {
                     ...this.state.roomList,
@@ -67,7 +65,7 @@ export default class Lobby extends React.Component {
                     </form>
                     <a href="/room/random" className="connect-btn">Подключиться к случайной</a>
                 </div>
-                <RoomMenu />
+                <RoomMenu socket={this.props.socket}/>
             </div>
         )
     }
