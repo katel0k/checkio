@@ -41,7 +41,7 @@ class RoomMenu extends React.Component {
                             <div className="room-menu__entry" key={room_id}>
                                 <span>{room_id}</span>
                                 <span>{room.state}</span>
-                                <span>{room.viewers.length}</span>
+                                <span>{Object.entries(room.viewers).length}</span>
                                 <a href={"/room/" + room_id} className="connect-btn">Подключиться</a>
                             </div>
                     )

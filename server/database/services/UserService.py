@@ -18,8 +18,11 @@ def make_user(user_tuple: tuple | None) -> UserModel | None:
         privileges = user_tuple[5]
     )
 
+import sys
+
 @app.login_manager.user_loader
 def load_user(id: int):
+    print(id, file=sys.stderr)
     cur.execute(
         '''SELECT id, email, password_hash, nickname, rating, privileges
             FROM users WHERE id=%s''', (id, ))

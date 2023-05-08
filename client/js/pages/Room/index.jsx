@@ -158,6 +158,12 @@ export default class Room extends React.Component {
             });
         });
 
+        this.props.socket.on('player_left', (viewers) => {
+            this.setState({
+                viewers
+            });
+        });
+
         this.props.socket.on('player_set', (player) => {
             this.setState({
                 whitePlayer: player
