@@ -46,8 +46,8 @@ def join_user(room: RoomModel, user: UserModel) -> ViewerModel:
     )
 
 def leave_user(room: RoomModel, user: UserModel) -> None:
-    cur.execute('''UPDATE viewers 
-        time_left=NOW()::TIMESTAMP 
+    cur.execute('''UPDATE viewers SET
+        left_dttm=NOW()::TIMESTAMP 
         WHERE user_id=%s AND room_id=%s''', 
         (user.id, room.id))
     conn.commit()

@@ -6,34 +6,6 @@ from .game_loop import GameLoop
 from .user_manager import UserManager
 socketio = app.socketio
 server = app
-# @socketio.on('disconnect')
-# def disconnect_event_handler():
-#     print(request.__dict__, file=sys.stderr)
-#     print(session.__dict__, file=sys.stderr)
-    
-    # if not current_user.is_authenticated:
-    #     return
-    # room = current_user.current_room
-    # print(room, file=sys.stderr)
-    # print(current_user, file=sys.stderr)
-    # if room is None:
-    #     return
-    # room.disconnect_user(current_user)
-    # current_user.disconnect_room(room)
-    # socketio.emit('room_list_updated', (room.id, room._state, len(room.viewers)), to=app.lobby)
-    # for room in rooms():
-    #     print(room, file=sys.stderr)
-    #     leave_room(room)
-
-# @socketio.on('client_disconnecting')
-# def client_disconnecting_event_handler(room_id, user_id):
-#     print(room_id, user_id, file=sys.stderr)
-#     if room_id not in app.room_list: return
-#     room = app.room_list[room_id]
-#     user = User.load_user(user_id)
-#     if not room.has_user(user): return
-#     room.disconnect_user(user)
-#     socketio.emit('room_list_updated', (room.id, room._state, len(room.viewers)), to=app.lobby)
 
 '''Эти обработчики необходимо добавлячть за пределами классов, чтобы они подгрузились'''
 
@@ -58,8 +30,6 @@ def handle_disconnect():
     if 'room_id' not in session:
         return
     app.room_list[session['room_id']].handle_event('disconnect')
-    # debug(session['room_id'])
-    # debug(session.__dict__)
 
 # обработчик этого события отличается от других, потому что он кладет в сессию айдишник комнаты
 @socketio.on('join')

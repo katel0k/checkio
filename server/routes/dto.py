@@ -12,7 +12,10 @@ class UserDTO(dict):
             rating = user.rating
         )
 
-
+class UserManagerDTO(dict):
+    def __init__(self, user_manager):
+        dict.__init__(self,
+            { user_id: UserDTO(user) for (user_id, user) in user_manager.users.items() } )
 
 class RoomDTO(dict):
     def __init__(self, room):
@@ -21,9 +24,7 @@ class RoomDTO(dict):
             state = room.model.state
         )
         self['user'] = UserDTO(current_user)
-        self['viewers'] = {
-            user_id: UserDTO(user) for (user_id, user) in room.get_users().items()
-        }
+        self['viewers'] = UserManagerDTO(room.user_manager)
 
 class GameDTO(dict):
     def __init__(self, game):
