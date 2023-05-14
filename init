@@ -1,0 +1,25 @@
+#!/bin/bash
+
+############################ конфиг ##########################
+
+DATABASE_PORT=6000
+DATABASE_NAME=checkers_db_2
+
+############################ конфиг ##########################
+
+
+echo Здравствуйте, этот скрипт установит кучу всего, в том числе контейнер с базой данных. По всем вопросам обращаться в телеграм: @katelok
+
+echo Собираю клиент
+cd client
+npm install
+export NODE_OPTIONS=--openssl-legacy-provider
+npm run start
+
+echo Устанавливаю базу данных
+cd ../server/database
+docker compose up
+# docker build -t $DATABASE_NAME .
+# docker run --build-arg PORT=$DATABASE_PORT --build-arg NAME=$DATABASE_NAME Dockerfile
+# docker run --detach $DATABASE_NAME
+docker cp db_ddl.sql $DATABASE_NAME:db_ddl.sql

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block react %}
+    {% if current_user.is_authenticated %}
+        <div class="__react-root"></div>
+        <script src="/client/dist/main.js"></script>
+    {% else %}
+        <section class="promo">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 offset-md-0 col-lg-10 offset-lg-1">
+                        <img src="/client/img/index_pic.gif" alt="checkers" class="promo_gif" >
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+    
+
+    <!-- <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="js/script.js" ></script> -->
+    <!-- <script src="/client/dist/index.js"></script> -->
+    
+{% endblock %}
