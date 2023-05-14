@@ -25,6 +25,7 @@ class RoomDTO(dict):
         )
         self['user'] = UserDTO(current_user)
         self['viewers'] = UserManagerDTO(room.user_manager)
+        self['game'] = GameLoopDTO(room.game_loop)
 
 class GameDTO(dict):
     def __init__(self, game):
@@ -34,6 +35,6 @@ class GameDTO(dict):
 class GameLoopDTO(dict):
     def __init__(self, game_loop):
         dict.__init__(self,
-                      white_player = UserDTO(game_loop.white_player),
-                      black_player = UserDTO(game_loop.black_player),
-                      game = GameDTO(game_loop.game))
+                      white_player = None if game_loop.white_player is None else UserDTO(game_loop.white_player),
+                      black_player = None if game_loop.black_player is None else UserDTO(game_loop.black_player),
+                      game = None if game_loop.game is None else GameDTO(game_loop.game))

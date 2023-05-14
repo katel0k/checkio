@@ -35,6 +35,7 @@ def make_new_move(game: GameModel, body: str, index: int, user: UserModel) -> Tu
     ''', (
         user.id, game.id, body, index
     ))
+    res = cur.fetchone()
     conn.commit()
     return TurnModel(
         user_id = res[0],
@@ -45,10 +46,16 @@ def make_new_move(game: GameModel, body: str, index: int, user: UserModel) -> Tu
     )
 
 def change_outcome(game: GameModel, new_outcome: GameOutcomes):
+    new_outcome = new_outcome.value
     cur.execute('''UPDATE games SET outcome=%s WHERE id=%s''', (new_outcome, game.id))
     cur.execute('''UPDATE users SET rating=rating+1
       FROM (
         SELECT users.id FROM users JOIN user_games ON (users.id = user_games.user_id)
-        WHERE %s='WHITE_WON' AND is_white OR %s='BLACK_WON' AND NOT is_white
-    ) AS valid_users WHERE valid_users.id = users.id''')
+        WHERE %s='WHITE_WON' AND is_white OR %s='BLACK_WON' AND NOT is_white AND game_id=%s
+    ) AS valid_users WHERE valid_users.id = users.id''', (new_outcome, new_outcome, game.id))
+    cur.execute('''UPDATE users SET rating=rating-1
+      FROM (
+        SELECT users.id FROM users JOIN user_games ON (users.id = user_games.user_id)
+        WHERE %s='WHITE_WON' AND NOT is_white OR %s='BLACK_WON' AND is_white AND game_id=%s
+    ) AS valid_users WHERE valid_users.id = users.id''', (new_outcome, new_outcome, game.id))
     conn.commit()

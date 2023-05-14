@@ -21,11 +21,6 @@ add_room_event_handler('change_setting')
 add_room_event_handler('made_move')
 add_room_event_handler('left_game')
 
-
-from sys import stderr
-def debug(*args):
-    print(*args, file=stderr)
-
 @socketio.on('disconnect')
 def handle_disconnect():
     if 'room_id' not in session:
@@ -33,9 +28,8 @@ def handle_disconnect():
     room = app.room_list[session['room_id']]
     room.handle_event('disconnect')
     if len(room.user_manager.users) == 0:
-        RoomService.change_state(room.model, RoomStates.DEAD)
         app.room_list.pop(room.model.id)
-        socketio.emit('room_list_updated', (room.model.id, RoomDTO(room)), to=app.lobby)
+        room.update_state(RoomStates.DEAD)
 
 # обработчик этого события отличается от других, потому что он кладет в сессию айдишник комнаты
 @socketio.on('join')
@@ -55,3 +49,7 @@ class Room:
     def handle_event(self, event, *args, **kwargs):
         self.user_manager.handle_event(event, *args, **kwargs)
         self.game_loop.handle_event(event, *args, **kwargs)
+
+    def update_state(self, new_state: RoomStates):
+        RoomService.change_state(self.game_loop.room.model, new_state)
+        socketio.emit('room_list_updated', (self.model.id, RoomDTO(self)), to=app.lobby)

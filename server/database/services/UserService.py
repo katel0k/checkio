@@ -22,7 +22,8 @@ import sys
 
 @app.login_manager.user_loader
 def load_user(id: int):
-    print(id, file=sys.stderr)
+    # FIXME: неотслеживаемый баг, вероятно, связанный с асинхронностью, при выходе из страницы бывает вылетает ошибка
+    # print(id, file=sys.stderr)
     cur.execute(
         '''SELECT id, email, password_hash, nickname, rating, privileges
             FROM users WHERE id=%s''', (id, ))

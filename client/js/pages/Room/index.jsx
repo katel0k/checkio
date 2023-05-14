@@ -188,30 +188,34 @@ export default class Room extends React.Component {
             });
         });
 
-        // window.onbeforeunload = function () {
-        //     socket.emit('client_disconnecting', 
-        //         {
-        //             room_id: this.state.roomId,
-        //             user_id: this.state.self.id
-        //         }
-        //         );
-        // }
+        this.props.socket.on('game_ended', (obj) => {
+            this.setState({
+                state: waiting_state,
+                whitePlayer: obj.white_player,
+                blackPlayer: obj.black_player,
+                self: {
+                    ...this.state.self,
+                    color: undefined
+                },
+                game: obj.game
+            });
+        });
 
         fetch(new URL('info', location.href))
             .then(response => response.json())
             .then(obj => {
                 let color;
                 if (obj.state == playing_state) {
-                    if (obj.user.id == obj.white_player.id)
+                    if (obj.user.id == obj.game.white_player.id)
                         color = 'white'
-                    else if (obj.user.id == obj.black_player.id)
+                    else if (obj.user.id == obj.game.black_player.id)
                         color = 'black';
                 }
                 this.setState({
                     roomId: obj.id,
                     state: obj.state,
-                    whitePlayer: obj.white_player,
-                    blackPlayer: obj.black_player,
+                    whitePlayer: obj.game.white_player,
+                    blackPlayer: obj.game.black_player,
                     viewers: obj.viewers,
                     self: {
                         id: obj.user.id,
@@ -230,7 +234,6 @@ export default class Room extends React.Component {
     }
 
     render() {
-        // console.log(this.state.viewers);
         return (
             <section className="waiting">
                 <div className="container">
@@ -243,7 +246,7 @@ export default class Room extends React.Component {
                         {
                             this.state.state == waiting_state ?
                             <GameSetter handleConnectBtnClick={this.handleConnectBtnClick.bind(this)} /> :
-                            <CheckersUI playerColor={this.state.self.color} roomId={this.state.roomId} socket={socket}/>
+                            <CheckersUI playerColor={this.state.self.color} roomId={this.state.roomId} socket={this.props.socket}/>
                         }
                     </div>
                 </div>

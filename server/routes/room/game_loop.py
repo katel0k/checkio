@@ -1,4 +1,4 @@
-from ...database import UserModel, RoomStates, GameModel
+from ...database import UserModel, RoomStates, GameModel, GameOutcomes
 from ...database.services import RoomService, GameService
 from .game_logic import Game, GameMove
 
@@ -49,6 +49,8 @@ class GameLoopStrategy:
 class GameLoopSetupStrategy(GameLoopStrategy):
     def __init__(self, game_loop: GameLoop):
         super().__init__(game_loop)
+        self.game_loop.white_player = None
+        self.game_loop.black_player = None
         self.game_loop.game_model = None
         self.game_loop.game = None
 
@@ -64,8 +66,8 @@ class GameLoopSetupStrategy(GameLoopStrategy):
             'rating': current_user.rating
         }, to=room)
         if self.game_loop.is_ready_to_start():
-            RoomService.change_state(self.game_loop.room.model, RoomStates.PLAYING)
             self.game_loop.change_strategy(GameLoopPlayingStrategy(self.game_loop))
+            self.game_loop.room.update_state(RoomStates.PLAYING)
             socketio.emit('game_started', GameLoopDTO(self.game_loop), to=room)
 
 
@@ -90,6 +92,8 @@ class GameLoopPlayingStrategy(GameLoopStrategy):
         if move.is_white_player is None: return
 
         move = self.game_loop.game.handle_move(move)
+        if not move: return
+
         if move.is_possible:
             GameService.make_new_move(self.game_loop.game_model, str(move), len(self.game_loop.game.history), 
                     self.game_loop.white_player if move.is_white_player else self.game_loop.black_player)
@@ -101,11 +105,18 @@ class GameLoopPlayingStrategy(GameLoopStrategy):
                 sort_keys=True, indent=4), to=self.game_loop.room)
         
         if self.game_loop.game.outcome is not None:
-            GameService.change_outcome(self.game_loop.game_model, self.game_loop.game.outcome)
+            GameService.change_outcome(self.game_loop.game_model, GameOutcomes.from_db_record(self.game_loop.game.outcome))
+    
+    def handle_disconnect_event(self):
+        GameService.change_outcome(self.game_loop.game_model, GameOutcomes.CANCELLED)
+        self.game_loop.change_strategy(GameLoopSetupStrategy(self.game_loop))
+        self.game_loop.room.update_state(RoomStates.WAITING)
+        socketio.emit('game_ended', GameLoopDTO(self.game_loop), to=self.game_loop.room)
 
     def handle_event(self, event: str, *args, **kwargs):
         events_map = {
-            'made_move': self.handle_move_event
+            'made_move': self.handle_move_event,
+            'disconnect': self.handle_disconnect_event
         }
         if event not in events_map: return
         res = events_map[event](*args, **kwargs)
