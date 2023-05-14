@@ -4,3 +4,6 @@ server/virt
 __pycache__/
 dist/
 server/database-git
+init_server
+cleanup
+init

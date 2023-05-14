@@ -1,3 +1,0 @@
-source virt/bin/activate
-pip install flask flask_login flask_socketio flask_wtf email_validator blinker psycopg2 gevent-websocket eventlet
-export FLASK_APP=server.py
