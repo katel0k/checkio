@@ -53,4 +53,15 @@ def get_user(email: str, password: str) -> UserModel | None:
         return None
     return make_user(user_tuple)
 
-__all__ = ['register_new_user', 'get_user']
+def get_user_info(user: UserModel):
+    cur.execute('''SELECT game_id, outcome, is_white
+    FROM full_game_info WHERE user_id=%s''', (user.id, ))
+    res = {}
+    for game in cur.fetchall():
+        res[game[0]] = {
+            'outcome': game[1],
+            'is_white': game[2]
+        }
+    return res
+
+__all__ = ['register_new_user', 'get_user', 'get_user_info']

@@ -1,8 +1,9 @@
-from flask import redirect
+from flask import redirect, render_template
 from flask_login import current_user, login_user, logout_user
 from .forms import LoginForm, RegisterForm
 from server import app
 from ..database.services import UserService
+import json
 
 server = app
 socketio = app.socketio
@@ -33,3 +34,19 @@ def register_route():
         login_user(user, remember=True)
         return redirect('/')
     return redirect('/')
+
+@server.route('/user')
+def user_route():
+    if not current_user.is_authenticated:
+        return redirect('/')
+
+    return render_template('user.html')
+
+@server.route('/user_info')
+def user_info_route():
+    if not current_user.is_authenticated:
+        return redirect('/')
+    games_list = UserService.get_user_info(current_user)
+    return json.dumps({
+        "games_list": games_list
+        })
