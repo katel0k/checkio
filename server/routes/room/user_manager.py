@@ -33,7 +33,7 @@ class UserManager:
         if not self.has_user(user): return
         self.users.pop(user.id)
 
-# потенциально, код ниже можно убрать отсюда, чтобы сделать объект UserManager реюзабельным
+# TODO: потенциально, код ниже можно убрать отсюда, чтобы сделать объект UserManager реюзабельным
 # например, если я захочу добавить чат в лобби
     def handle_join_event(self):
         user = copy(current_user)
