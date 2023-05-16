@@ -105,7 +105,10 @@ class GameLoopPlayingStrategy(GameLoopStrategy):
                 sort_keys=True, indent=4), to=self.game_loop.room)
         
         if self.game_loop.game.outcome is not None:
-            GameService.change_outcome(self.game_loop.game_model, GameOutcomes.from_db_record(self.game_loop.game.outcome))
+            GameService.change_outcome(self.game_loop.game_model, self.game_loop.game.outcome)
+            self.game_loop.change_strategy(GameLoopSetupStrategy(self.game_loop))
+            self.game_loop.room.update_state(RoomStates.WAITING)
+            socketio.emit('game_ended', GameLoopDTO(self.game_loop), to=self.game_loop.room)
     
     def handle_disconnect_event(self):
         GameService.change_outcome(self.game_loop.game_model, GameOutcomes.CANCELLED)

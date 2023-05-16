@@ -1,3 +1,5 @@
+from ...database import GameOutcomes
+
 class GameField(list):
     ''' Класс для удобства, часто используется доступ по tuple (row, column), и он позволяет такой доступ делать
     '''
@@ -76,7 +78,7 @@ w0w0w0w0'''
         self.CAN_QUEEN_EAT_FURTHER = kwargs.get('CAN_QUEEN_EAT_FURTHER', True)
         self.FIELD_SIZE = kwargs.get('FIELD_SIZE', 8)
 
-        self.outcome = None # исход партии. По умолчанию это False, то есть его еще нет
+        self.outcome: GameOutcomes | None = None # исход партии. По умолчанию это False, то есть его еще нет
         self.history = []
         self._prev = None # последняя шашка, сделавшая съедающий ход.
 
@@ -226,7 +228,7 @@ w0w0w0w0'''
             self.is_white_move = not self.is_white_move
 
         if len(self._get_all_noneating_moves()) == 0 and len(self._get_all_fights()) == 0:
-            self.outcome = 'white' if not self.is_white_move else 'black'
+            self.outcome = GameOutcomes.WHITE_WON if not self.is_white_move else GameOutcomes.BLACK_WON
         
         self.history.append(move)
 
