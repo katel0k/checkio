@@ -1,3 +1,5 @@
+# из этих файлов надо просто выполнить код
+# модульная система питона не позволит просто написать import .user
 from .user import *
 from .lobby import *
 from .room import *
