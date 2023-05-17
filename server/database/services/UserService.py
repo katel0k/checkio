@@ -54,6 +54,7 @@ def get_user(email: str, password: str) -> UserModel | None:
     return make_user(user_tuple)
 
 def get_user_info(user: UserModel):
+    cur = conn.cursor()
     cur.execute('''SELECT game_id, outcome, is_white
     FROM full_game_info WHERE user_id=%s''', (user.id, ))
     res = {}
@@ -64,4 +65,19 @@ def get_user_info(user: UserModel):
         }
     return res
 
-__all__ = ['register_new_user', 'get_user', 'get_user_info']
+def get_user_rating_graph(user: UserModel):
+    cur = conn.cursor()
+    cur.execute('''SELECT previous_rating, changed_dttm
+      FROM users JOIN rating_history ON (users.id = rating_history.user_id)
+    WHERE user_id=%s 
+    ''', (user.id, ))
+
+    dates = []
+    values = []
+    for rating, date in cur.fetchall():
+        dates.append(date)
+        values.append(rating)
+
+    return dates, values
+
+__all__ = ['register_new_user', 'get_user', 'get_user_info', 'get_user_rating_graph']

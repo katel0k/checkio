@@ -1,9 +1,11 @@
-from flask import redirect, render_template
+from flask import redirect, render_template, send_file
 from flask_login import current_user, login_user, logout_user
 from .forms import LoginForm, RegisterForm
 from server import app
 from ..database.services import UserService
 import json
+
+import matplotlib.pyplot as plt
 
 server = app
 socketio = app.socketio
@@ -50,3 +52,14 @@ def user_info_route():
     return json.dumps({
         "games_list": games_list
         })
+
+@server.route('/user_graph')
+def user_graph_route():
+    if not current_user.is_authenticated:
+        return redirect('/')
+    
+    dates, values = UserService.get_user_rating_graph(current_user)
+    plt.plot(dates, values)
+    plt.savefig('server/plot.png')
+
+    return send_file('plot.png', mimetype='image/png')

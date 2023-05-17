@@ -51,11 +51,11 @@ def change_outcome(game: GameModel, new_outcome: GameOutcomes):
     cur.execute('''UPDATE users SET rating=rating+1
       FROM (
         SELECT users.id FROM users JOIN user_games ON (users.id = user_games.user_id)
-        WHERE %s='WHITE_WON' AND is_white OR %s='BLACK_WON' AND NOT is_white AND game_id=%s
+        WHERE (%s='WHITE_WON' AND is_white OR %s='BLACK_WON' AND NOT is_white) AND game_id=%s
     ) AS valid_users WHERE valid_users.id = users.id''', (new_outcome, new_outcome, game.id))
     cur.execute('''UPDATE users SET rating=rating-1
       FROM (
         SELECT users.id FROM users JOIN user_games ON (users.id = user_games.user_id)
-        WHERE %s='WHITE_WON' AND NOT is_white OR %s='BLACK_WON' AND is_white AND game_id=%s
+        WHERE (%s='WHITE_WON' AND NOT is_white OR %s='BLACK_WON' AND is_white) AND game_id=%s
     ) AS valid_users WHERE valid_users.id = users.id''', (new_outcome, new_outcome, game.id))
     conn.commit()
