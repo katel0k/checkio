@@ -3,9 +3,9 @@ from typing import List
 from ..models import RoomModel, ViewerModel
 
 conn = app.db.conn
-cur = app.db.cur
 
 def get_all_viewers(room: RoomModel) -> List[ViewerModel]:
+    cur = conn.cursor()
     cur.execute('''
         SELECT user_id, room_id, joined_dttm, left_dttm
         FROM rooms JOIN viewers ON (rooms.id = viewers.room_id)

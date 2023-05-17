@@ -2,11 +2,9 @@ from server import app
 from ..models import GameModel, RoomModel, UserModel, TurnModel, GameOutcomes
 
 conn = app.db.conn
-cur = app.db.cur
-
-
 
 def make_new_game(room: RoomModel, white_player: UserModel, black_player: UserModel) -> GameModel:
+    cur = conn.cursor()
     cur.execute('''
             INSERT INTO games (room_id) VALUES (%s)
             RETURNING id, room_id, outcome, started_dttm
@@ -28,6 +26,7 @@ def make_new_game(room: RoomModel, white_player: UserModel, black_player: UserMo
     )
 
 def make_new_move(game: GameModel, body: str, index: int, user: UserModel) -> TurnModel:
+    cur = conn.cursor()
     res = cur.execute('''
         INSERT INTO turns (user_id, game_id, body, index)
         VALUES (%s, %s, %s, %s)
@@ -46,6 +45,7 @@ def make_new_move(game: GameModel, body: str, index: int, user: UserModel) -> Tu
     )
 
 def change_outcome(game: GameModel, new_outcome: GameOutcomes):
+    cur = conn.cursor()
     new_outcome = new_outcome.value
     cur.execute('''UPDATE games SET outcome=%s WHERE id=%s''', (new_outcome, game.id))
     cur.execute('''UPDATE users SET rating=rating+1
