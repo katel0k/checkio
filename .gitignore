@@ -3,5 +3,8 @@ package-lock.json
 server/virt
 __pycache__/
 dist/
-server/database
-client/arina-git
+server/database-git
+init_server
+cleanup
+init
+plot.png

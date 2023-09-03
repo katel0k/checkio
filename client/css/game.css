@@ -1,0 +1,259 @@
+.app-container {
+	display: flex;
+	justify-content: space-around;
+	-ms-align-items: center;
+	align-items: center;
+	min-width: 500px;
+	width: 80%;
+	max-width: 800px;
+	margin: 70px auto;
+}
+
+.app {
+	display: grid;
+	grid-template-columns: 1fr 3fr 1fr;
+	grid-template-areas: "player1 game player2";
+	grid-gap: 30px 30px;
+}
+
+.player1 {
+	grid-area: player1;
+}
+
+.player2 {
+	grid-area: player2;
+}
+
+.game-container {
+	grid-area: game;
+}
+
+.chat-container {
+	grid-area: chat;
+	background: #F0F0FA;
+	border: 1px solid silver;
+	border-radius: 10px;
+}
+
+.players-list-container {
+	grid-area: list;
+	background: #F0F0FA;
+	border: 1px solid silver;
+	border-radius: 10px;
+}
+
+.avatar-img {
+	width: 100%;
+	display: block;
+	border-radius: 10px;
+}
+
+.timer {
+	text-align: center;
+}
+
+.figures {
+	display: grid;
+	grid-template-columns: repeat(13, 1fr); /* 13 here instead of 12 cause in other case checkers would stick out */
+	flex-direction: row-reverse;
+}
+
+.figures__checker-img {
+	position: relative;
+	width: 200%;
+	opacity: 0.5;
+}
+
+.figures__checker-img_visible {
+	opacity: 1;
+}
+
+.FIO {
+	font-family: 'Open-sans';
+	font-style: bold;
+}
+
+.player-container {
+	display: flex;
+}
+
+.info.reverse, .reverse.profile {
+	flex-direction: column-reverse;
+}
+
+.profile {
+	display: flex;
+	flex-direction: column;
+	-ms-align-items: center;
+	align-items: center;
+	justify-content: space-around;
+}
+
+.avatar-container {
+	padding: 3px;
+}
+
+.FIO-container {
+	margin: 3px;
+}
+
+.money-container, .rating-container {
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+	-ms-align-items: center;
+	align-items: center;
+	justify-content: space-between;
+	margin: 3px;
+}
+
+.money-img, .rating-img {
+	display: inline-block;
+	width: 20px;
+	margin: 0 3px;
+}
+
+.info {
+	display: flex;
+	justify-content: space-between;
+	-webkit-flex-direction: column;
+	-moz-flex-direction: column;
+	-ms-flex-direction: column;
+	-o-flex-direction: column;
+	flex-direction: column;
+}
+
+.info-container {
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+	justify-content: space-around;
+}
+
+.game-stats {
+	height: 30px;
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: -o-flex;
+	display: flex;
+	justify-content: space-around;
+	-ms-align-items: center;
+	align-items: center;
+	background: #F0F0FA;
+	border: 1px solid silver;
+	border-radius: 10px;
+}
+
+.history-container {
+	max-height: 150px;
+	height: 150px;
+	background: #F0F0FA;
+	border: 1px solid silver;
+	border-radius: 10px;
+	padding: 5px;
+}
+
+.history {
+	height: 100%;
+	max-height: 100%;
+	overflow-y: auto;
+	overflow-y: -moz-scrollbars-none;
+	-ms-overflow-y-style: none;
+}
+
+.history::-webkit-scrollbar {
+	width: 4px;
+	cursor: pointer;
+}
+.history::-webkit-scrollbar-button { background: transparent }
+.history::-webkit-scrollbar-track {
+	background-color: silver;
+	border-radius: 3px;
+}
+.history::-webkit-scrollbar-track-piece { background-color: transparent }
+.history::-webkit-scrollbar-thumb {
+	background-color: #666;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.history__list {
+	margin: 0;
+	font-size: 14px;
+}
+
+.history__list-el {
+	padding: 3px;
+}
+
+.history__list-el::before {
+	font-size: 12px;
+}
+
+.history__list-el-span {
+	height: 12px;
+	line-height: 12px;
+}
+
+.message {
+	min-height: 40px;
+}
+
+.message-author-av-container {
+	padding: 3px;
+	display: inline-block;
+	float: left;
+}
+
+.message-body-container {
+	padding: 3px;
+	float: right;
+}
+
+.message-body {
+	margin: 0;
+}
+
+.message-author-av {
+	width: 30px;
+	border-radius: 100%;
+}
+
+.checkers-settings {
+	position: relative;
+	padding: 5px;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+.submit-btn-container {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+}
+
+.submit-btn {
+	padding: 20px 40px;
+	font-size: 20px;
+	text-transform: uppercase;
+	font-family: sans-serif;
+	border: none;
+	color: white;
+	background: #6060ff;
+	outline: none;
+}
+
+.submit-btn:hover {
+	cursor: pointer;
+	background: #5050ff;
+}
+
+.submit-btn:active {
+	background: #4040ff;
+}
