@@ -2,7 +2,7 @@ node_modules/
 package-lock.json
 server/virt
 __pycache__/
-dist/
+client/dist/main.js
 server/database-git
 init_server
 cleanup
