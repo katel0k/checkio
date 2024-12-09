@@ -2,17 +2,13 @@ from ...database import UserModel
 from ...database.services import RoomService
 
 from flask_login import current_user
-from flask_socketio import emit, join_room, leave_room
+from flask_socketio import join_room, leave_room
 from copy import copy
 
 from server import app
 socketio = app.socketio
 from ..dto import *
 from typing import Dict
-
-from sys import stderr
-def debug(*args):
-    print(*args, file=stderr)
 
 class UserManager:
     def __init__(self, room, users: Dict[int, UserModel] = dict()):

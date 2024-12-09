@@ -4,3 +4,4 @@ server/virt
 __pycache__/
 client/dist/main.js
 plot.png
+.venv

@@ -1,5 +1,5 @@
 from ...database import UserModel, RoomStates, GameModel, GameOutcomes
-from ...database.services import RoomService, GameService
+from ...database.services import GameService
 from .game_logic import Game, GameMove
 
 from flask_login import current_user

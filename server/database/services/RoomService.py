@@ -5,7 +5,6 @@ from ..models import RoomModel, UserModel, ViewerModel, RoomStates
 conn = app.db.conn
 
 def make_room(room_tuple: tuple | None) -> RoomModel | None:
-    cur = conn.cursor()
     if room_tuple is None: return None
     return RoomModel(
         id=room_tuple[0],

@@ -1,2 +1,0 @@
-rm -rf client/dist/main.js
-rm -rf client/node_modules
