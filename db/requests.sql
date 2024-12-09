@@ -1,9 +1,0 @@
-CREATE TABLE user(
-    id SERIAL PRIMARY KEY
-)
-
-SELECT * FROM user WHERE id=1
-
-CREATE TABLE game(
-    id SERIAL PRIMARY KEY
-)

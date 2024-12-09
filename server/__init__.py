@@ -1,7 +1,4 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv(dotenv_path='../')
 
 from .application import create_app
 app = create_app(

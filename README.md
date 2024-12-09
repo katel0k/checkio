@@ -26,27 +26,8 @@
 
 ## Запуск и установка
 
-Для запуска требуются pip и npm
-
-Для компиляции клиента
+Для запуска потребуется докер, этой команды должно хватить
 
 ```bash
-cd client
-npm install
-npm run watch
-```
-
-Для запуска базы данных, если она уже создана
-
-```bash
-docker restart checkers_db
-docker exec -it checkers_db bash
-```
-
-Для запуска сервера (Из корневой папки)
-
-```bash
-pip install -r server/requirements.txt
-export FLASK_APP=server
-flask run
+docker compose up
 ```

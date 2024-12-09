@@ -4,5 +4,4 @@ flask_wtf
 email_validator
 blinker
 psycopg2-binary
-python-dotenv
 matplotlib

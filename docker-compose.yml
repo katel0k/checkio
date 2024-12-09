@@ -1,0 +1,29 @@
+services:
+  db:
+    build: ./db
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - backend
+    volumes:
+      - client:/client
+  client:
+    build: ./client
+    volumes:
+      - client:/client
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  client:
