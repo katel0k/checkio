@@ -1,12 +1,8 @@
 {
   "name": "checkers",
-  "version": "1.0.0",
-  "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server",
-    "start": "export NODE_OPTIONS=--openssl-legacy-provider && webpack",
-    "watch": "export NODE_OPTIONS=--openssl-legacy-provider && webpack --watch"
+    "build": "webpack",
+    "watch": "webpack --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.10.3",
@@ -28,8 +24,5 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^6.10.0",
     "socket.io-client": "^4.6.0"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": ""
+  }
 }
