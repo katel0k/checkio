@@ -58,4 +58,3 @@ class UserManager:
         res = events_map[event](*args, **kwargs)
         socketio.emit('room_list_updated', (self.room.model.id, RoomDTO(self.room)), to=app.lobby)
         return res
-

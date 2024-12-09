@@ -18,7 +18,6 @@
             <div class="container">
                 <ul class="menu">
                     <li class="menu__item"><a href="/" class="menu__link">Главная</a></li>
-                    <!-- <li class="menu__item" data-modal="game"><a href="#" class="menu__link">Создать новую игру</a></li> -->
                     {% if current_user.is_authenticated %}
                         <li class="menu__item">{{current_user.nickname}}</li>
                         <li class="menu__item"><a class="user__log-btn" href="{{ url_for('logout_route') }}">Выйти</a></li>
@@ -38,19 +37,14 @@
     {% if not current_user.is_authenticated %}
         <div class="overlay">
             <div class="modal" id="sign" > 
-                <!-- consultation = sign -->
                 <div class="modal__close">&times;</div>
                 <div class="modal__subtitle">Войти в систему</div>
                 <form class="feed-form" action="{{url_for('login_route')}}" method="POST">
                     {{ login_form.hidden_tag() }} <!-- DO NOT REMOVE IT EVER AGAIN NOTHING WORKS OTHERWISE -->
                     {{ login_form.login_email(placeholder="Почта", class="email") }}
                     {{ login_form.login_password(placeholder="Пароль", class="password") }}
-                    <!-- <input name="name" required placeholder="Ваше имя" type="text">
-                    <input name="phone" required placeholder="Ваш телефон" >
-                    <input name="email" required placeholder="Ваш e-mail" type="text"> -->
                     {{ login_form.login_rem(placeholder="Запомнить") }}
                     {{ login_form.login_submit(placeholder="Войти", class="btn btn_submit") }}
-                    <!-- <button data-modal="sign" class="btn btn_submit" >Войти</button> -->
                 </form>
             </div>
 
@@ -65,11 +59,6 @@
                     {{ reg_form.reg_password(placeholder="Пароль", class="password") }}
                     {{ reg_form.reg_password2(placeholder="Пароль заново", class="password2") }}
                     {{ reg_form.reg_submit(placeholder="Зарегистрироваться", class="btn btn_submit", modal="register") }}
-                    <!-- <input name="name" required placeholder="Логин" type="text">
-                    <input name="password" required placeholder="Пароль" type="password">
-                    <input name="password2" required placeholder="Подтвердите пароль" type="password"> -->
-
-                    <!-- <button data-modal="register" class="btn btn_submit" >Зарегистрироваться</button> -->
                 </form>
             </div>
 
@@ -81,8 +70,6 @@
                         <input type="checkbox" id="privat">
                         <label for="privat">Приватная</label>
                     </div>
-
-                    
                     <div class="select">
                         <input class="select__input" type="hidden" name="">
                         <div class="select__head">Вариант игры</div>

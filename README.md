@@ -32,7 +32,7 @@
 
 ```bash
 cd client
-npm init
+npm install
 npm run watch
 ```
 
@@ -46,7 +46,7 @@ docker exec -it checkers_db bash
 Для запуска сервера (Из корневой папки)
 
 ```bash
-pip install -r /server/requirements.txt
+pip install -r server/requirements.txt
 export FLASK_APP=server
 flask run
 ```

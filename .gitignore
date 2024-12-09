@@ -3,8 +3,4 @@ package-lock.json
 server/virt
 __pycache__/
 client/dist/main.js
-server/database-git
-init_server
-cleanup
-init
 plot.png

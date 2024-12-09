@@ -1,6 +1,7 @@
-flask==2.3.2
-flask_login==0.6.2
-flask_socketio==5.3.4
-flask_wtf==1.1.1
-email_validator==2.0.0.post2
-blinker==1.6.2
+flask_login
+flask_socketio
+flask_wtf
+email_validator
+blinker
+psycopg2-binary
+python-dotenv

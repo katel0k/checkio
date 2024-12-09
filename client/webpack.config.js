@@ -1,10 +1,6 @@
 const path = require('path');
 
 module.exports = {
-	// entry: {
-	// 	room: './js/room.js',
-	// 	index: './js/index.js'
-	// },
 	entry: './js/index.js',
 	mode: 'none',
 	output: {
@@ -21,14 +17,6 @@ module.exports = {
 				use: {
 					loader: "babel-loader"
 				}
-			},
-			{
-				test: /\.css$|\.sass$/,
-				use: [
-					"style-loader",
-					"css-loader",
-					"sass-loader"
-				]
 			},
 			{
 				test: /\.(png|svg|jpg|gif)$/,

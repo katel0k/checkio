@@ -13,7 +13,6 @@ function CheckersCell ({checker, bg, pos, selected}) {
             {checker.is_empty ? undefined : <CheckerImg 
                     is_white={checker.is_white}
                     is_queen={checker.is_queen}
-
                     />}
         </div>
     )

@@ -1,8 +1,4 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
-
-import './Lobby.sass';
-
 
 class RoomMenu extends React.Component {
     constructor(props) {
@@ -68,7 +64,7 @@ export default class Lobby extends React.Component {
     render() {
         return (
             <div>
-                <div className="lobby__navbar">
+                <div className="lobby__navbar" style="background: black">
                     <form method="POST" action="/room" className="lobby__navbar__create-btn">
                         <input type="submit" className="toolbar__button" value="Создать новую комнату"/>
                     </form>

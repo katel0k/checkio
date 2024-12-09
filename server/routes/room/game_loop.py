@@ -124,5 +124,3 @@ class GameLoopPlayingStrategy(GameLoopStrategy):
         if event not in events_map: return
         res = events_map[event](*args, **kwargs)
         return res
-
-

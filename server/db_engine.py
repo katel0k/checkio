@@ -1,5 +1,4 @@
 import psycopg2
-# import config
 
 class DB:
     def __init__(self, **kwargs):
@@ -9,8 +8,6 @@ class DB:
             host = kwargs['DATABASE_HOST'],
             port = kwargs['DATABASE_PORT']
         )
-        # self.conn = psycopg2.connect(user='postgres', 
-                        # host='172.17.0.2', port=kwargs.get('DATABASE_PORT', 5432), password='admin')
 
         self.cur = self.conn.cursor()
     
