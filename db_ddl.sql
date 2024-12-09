@@ -1,3 +1,5 @@
+START TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     nickname VARCHAR(128),
@@ -23,7 +25,7 @@ CREATE TABLE viewers (
     left_dttm TIMESTAMP
 );
 
--- ALTER TABLE viewers ADD CONSTRAINT PK_viewers PRIMARY KEY (user_id, room_id);
+ALTER TABLE viewers ADD CONSTRAINT PK_viewers PRIMARY KEY (user_id, room_id);
 
 CREATE TYPE game_outcome AS ENUM ('PLAYING', 'WHITE_WON', 'BLACK_WON', 'DRAW', 'CANCELLED');
 
@@ -79,3 +81,5 @@ ALTER TABLE room_history ADD CONSTRAINT FK_rooms FOREIGN KEY (room_id) REFERENCE
 
 -- добавить update скрипт который будет менять состяние всех стархы комнат 
 -- и добавлять время выхода вьюверам оттуда
+
+COMMIT;

@@ -17,6 +17,7 @@
 В качестве ключа для пользователя не использована почта, потому что я хочу оставить возможность ее менять + это очень длинный ключ. Ник не использован, так как я не буду требовать уникальность от него, и его также можно будет менять.
 
 Возможные значения enum для games.outcome:
+
 - PLAYING
 - WHITE_WON
 - BLACK_WON
@@ -24,13 +25,9 @@
 - CANCELLED
 
 Возможные значения enum для rooms.state:
+
 - PLAYING
 - WAITING
 - DEAD
 
-Ссылка на гугл док с физической моделью:
-https://docs.google.com/spreadsheets/d/1hC_qekmgj2uTeukNfv29TqucTPXnWj-Y8AzS4u_D4f0/edit?usp=sharing
-
-
-
-
+[Гугл док с физической моделью](https://docs.google.com/spreadsheets/d/1hC_qekmgj2uTeukNfv29TqucTPXnWj-Y8AzS4u_D4f0/edit?usp=sharing)

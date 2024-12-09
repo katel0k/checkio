@@ -3,28 +3,6 @@
 
 START TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
--- задание 7
-SAVEPOINT task7;
-
-CREATE PROCEDURE DOWNLOAD()
-AS $$
-DECLARE table_name text;
-BEGIN
-    FOR table_name IN (
-        SELECT t.table_name FROM information_schema.tables t
-        WHERE table_schema LIKE 'public'
-    ) LOOP
-        EXECUTE format(E'COPY %I TO \'/databases/%I.csv\' DELIMITER \',\' CSV HEADER', table_name, table_name)
-            USING table_name;
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-CALL DOWNLOAD();
-
--- к сожалению, оказалось, что copy не умеет создавать файлы самостоятельно.
--- Вся эта работа была сделана напрасно и мне пришлось таки создавать файлы вручную:(((((
-
 SAVEPOINT task2;
 -- задание 2
 
@@ -97,7 +75,6 @@ CREATE EXTENSION plpython3u;
 -- Для конвертацию я импортирую библиотеку из своего проекта, которая уже написана. 
 -- Я для этого скопировал прост в / файлик с ней и добавил его для загрузчика
 
--- imports
 DO $$
 from sys import path
 path.append('/')
@@ -184,7 +161,6 @@ CREATE TRIGGER user_rating_trigger BEFORE UPDATE OF rating ON users
     FOR EACH ROW
     EXECUTE PROCEDURE trigger_insert_rating_history();
 
-
 SAVEPOINT task9;
 -- задание 9
 ALTER TABLE room_history ALTER COLUMN room_id SET NOT NULL;
@@ -194,7 +170,8 @@ ALTER TABLE turns ALTER COLUMN game_id SET NOT NULL;
 ALTER TABLE messages ALTER COLUMN user_id SET NOT NULL;
 ALTER TABLE messages ALTER COLUMN room_id SET NOT NULL;
 
-ALTER TABLE viewers DROP CONSTRAINT PK_viewers;
+ALTER TABLE viewers DROP CONSTRAINT PK_viewers CASCADE;
+ALTER TABLE messages ADD COLUMN id BIGSERIAL PRIMARY KEY;
 
 SAVEPOINT task10;
 -- задание 10
@@ -203,10 +180,12 @@ CREATE INDEX user_email_index ON users USING HASH (email);
 SAVEPOINT task11;
 -- задание 11
 
--- CREATE VIEW user_info 
--- WITH (
---     SELECT (nickname, user_id, rating) FROM users
--- );
+CREATE VIEW user_info 
+AS (
+    SELECT nickname, id, rating FROM users
+);
 
 SAVEPOINT task12;
 ALTER TABLE games RENAME COLUMN time_start TO started_dttm;
+
+COMMIT;
